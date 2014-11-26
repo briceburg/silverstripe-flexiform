@@ -2,18 +2,6 @@
 
 class GridFieldConfig_FlexiForm extends GridFieldConfig
 {
-
-    public static function include_requirements()
-    {
-        $moduleDir = self::get_module_dir();
-        Requirements::css($moduleDir . '/css/flexiforms.css');
-    }
-
-    public static function get_module_dir()
-    {
-        return basename(dirname(__DIR__));
-    }
-
     public function __construct()
     {
         $this->addComponent(new GridFieldButtonRow('before'));
@@ -78,7 +66,7 @@ class GridFieldConfig_FlexiForm extends GridFieldConfig
         // CSS improvements
         // /////////////////
 
-        self::include_requirements();
+        FlexiFormUtil::include_requirements();
     }
 }
 
