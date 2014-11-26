@@ -57,7 +57,7 @@ class FlexiForm extends Page
 
             $component = $config->getComponentByType('GridFieldAddNewMultiClass');
             $component->setClasses($classes);
-            $component->setTitle('Add Field');
+            $component->setTitle('Create New Field');
 
 
             $fields->addFieldToTab($this->flexiform_tab, new GridField('FlexiForm', 'Form Fields', $this->Fields(), $config));

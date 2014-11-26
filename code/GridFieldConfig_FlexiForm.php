@@ -26,6 +26,10 @@ class GridFieldConfig_FlexiForm extends GridFieldConfig
         $this->addComponent(new GridFieldDeleteAction(true));
         $this->addComponent(new GridFieldDetailForm());
 
+
+        $component = $this->getComponentByType('GridFieldAddExistingAutocompleter');
+        $component->setPlaceholderText('Search Existing Fields by Name');
+
         // Validation
         // ///////////
         $component = $this->getComponentByType('GridFieldDetailForm');
