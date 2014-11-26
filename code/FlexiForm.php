@@ -12,11 +12,11 @@ class FlexiForm extends Page
     );
 
     private static $many_many = array(
-        'Fields' => 'FlexiFormField'
+        'FlexiFields' => 'FlexiFormField'
     );
 
     private static $many_many_extraFields = array(
-        'Fields' => array(
+        'FlexiFields' => array(
             'Name' => 'Varchar',
             'Prompt' => 'Varchar',
             'DefaultValue' => 'Varchar',
@@ -25,7 +25,7 @@ class FlexiForm extends Page
         )
     );
 
-    protected $allowed_field_types = array(
+    protected $allowed_flexi_types = array(
         'FlexiFormTextField',
         'FlexiFormEmailField',
         'FlexiFormDropdownField',
@@ -48,9 +48,9 @@ class FlexiForm extends Page
             $config = new GridFieldConfig_FlexiForm();
 
             // Multi-Class Add Button
-            /////////////////////////
+            // ///////////////////////
             $classes = array();
-            foreach($this->allowed_field_types as $className) {
+            foreach ($this->getAllowedFlexiTypes() as $className) {
                 $class = singleton($className);
                 $classes[$className] = "{$class->Label()} Field";
             }
@@ -59,10 +59,11 @@ class FlexiForm extends Page
             $component->setClasses($classes);
             $component->setTitle('Create New Field');
 
-
-            $fields->addFieldToTab($this->flexiform_tab, new GridField('FlexiForm', 'Form Fields', $this->Fields(), $config));
+            $fields->addFieldToTab($this->flexiform_tab,
+                new GridField('FlexiForm', 'Form Fields', $this->FlexiFields(), $config));
         } else {
-            $fields->addFieldToTab($this->flexiform_tab, new LiteralField('FlexiForm', '<p>Please save before editing the form.</p>'));
+            $fields->addFieldToTab($this->flexiform_tab,
+                new LiteralField('FlexiForm', '<p>Please save before editing the form.</p>'));
         }
 
         return $fields;
@@ -74,7 +75,7 @@ class FlexiForm extends Page
 
         $names = array();
         if ($result->valid()) {
-            foreach ($this->Fields() as $field) {
+            foreach ($this->FlexiFields() as $field) {
 
                 if (empty($field->Name)) {
                     $result->error("Field names cannot be blank. Encountered a blank {$field->Label()} field.");
@@ -82,14 +83,16 @@ class FlexiForm extends Page
                 }
 
                 if (in_array($field->Name, $names)) {
-                    $result->error("Field Names must be unique per form. {$field->Name} was encountered twice.");
+                    $result->error(
+                        "Field Names must be unique per form. {$field->Name} was encountered twice.");
                     break;
                 } else {
                     $names[] = $field->Name;
                 }
 
                 $default_value = $field->DefaultValue;
-                if (! empty($default_value) && $field->Options()->exists() && ! in_array($default_value, $field->Options()->column('Value'))) {
+                if (! empty($default_value) && $field->Options()->exists() &&
+                     ! in_array($default_value, $field->Options()->column('Value'))) {
                     $result->error("The default value of {$field->getName()} must exist as an option value");
                     break;
                 }
@@ -98,7 +101,12 @@ class FlexiForm extends Page
         return $result;
     }
 
-    public function addFieldType($className)
+    public function getAllowedFlexiTypes()
+    {
+        return $this->allowed_flexi_types;
+    }
+
+    public function addAllowedFlexiType($className)
     {
         if (! class_exists($className)) {
             throw new Exception("FlexiFormField class $className not found");
@@ -108,19 +116,19 @@ class FlexiForm extends Page
             throw new Exception("$className is not a FlexiFormField");
         }
 
-        $this->allowed_field_types[] = $className;
+        $this->allowed_flexi_types[] = $className;
     }
 
-    public function setFieldTypes(Array $types)
+    public function setAllowedFlexiTypes(Array $classNames)
     {
-        return $this->allowed_field_types = $types;
+        return $this->allowed_flexi_types = $classNames;
     }
 
-    public function getFormFieldList()
+    public function getFrontEndFlexiFormFields()
     {
         $fields = new FieldList();
 
-        foreach ($this->Fields() as $field) {
+        foreach ($this->FlexiFields() as $field) {
             $fields->push($field);
         }
     }
