@@ -26,8 +26,53 @@ class GridFieldConfig_FlexiForm extends GridFieldConfig
         $this->addComponent(new GridFieldDeleteAction(true));
         $this->addComponent(new GridFieldDetailForm());
 
+        // Validation
+        // ///////////
         $component = $this->getComponentByType('GridFieldDetailForm');
-        $component->setValidator(new RequiredFields(array('FieldName')));
+        $component->setValidator(new RequiredFields(array(
+            'FieldName'
+        )));
+
+        // Sort Order
+        // ///////////
+        $this->addComponent(new GridFieldOrderableRows('SortOrder'));
+
+        // Inline Editing
+        // ///////////////
+        $component = $this->getComponentByType('GridFieldEditableColumns');
+        $component->setDisplayFields(array(
+            'Label' => array(
+                'title' => 'Type',
+                'field' => 'ReadonlyField'
+            ),
+            'Name' => array(
+                'title' => 'Name',
+                'field' => 'TextField'
+            ),
+            'Prompt' => array(
+                'title' => 'Prompt',
+                'field' => 'TextField'
+            ),
+            'DefaultValue' => array(
+                'title' => 'Default Value',
+                'callback' => function ($record, $column_name, $grid)
+                {
+                    return ($record->hasMethod('getDefaultValueFormField')) ?
+                        $record->getDefaultValueFormField('DefaultValue') : new TextField($column_name);
+                }
+            ),
+            'OptionsPreview' => array(
+                'title' => 'Options',
+                'field' => 'ReadonlyField'
+            ),
+            'Required' => array(
+                'title' => 'Required',
+                'field' => 'CheckboxField'
+            )
+        ));
+
+        // CSS improvements
+        // /////////////////
 
         self::include_requirements();
     }
@@ -59,7 +104,9 @@ class GridFieldConfig_FlexiFormOption extends GridFieldConfig
                 'field' => 'TextField'
             )
         ));
-
     }
+
+    // @todo reintroduce custom handlers to set name/default value only once
+    // --defer until patch gets merged into gridfield extensions
 }
 

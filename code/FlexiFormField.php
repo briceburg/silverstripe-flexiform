@@ -34,10 +34,6 @@ class FlexiFormField extends DataObject
         'FieldName' => 'Name'
     );
 
-    private static $default_sort = array(
-        'SortOrder'
-    );
-
     function getCMSFields()
     {
         $fields = parent::getCMSFields();
@@ -114,7 +110,5 @@ class FlexiFormField extends DataObject
         $value = $this->getField('Name');
         return (empty($value)) ? $this->FieldName : $value;
     }
-
-
 
 }

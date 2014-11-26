@@ -7,8 +7,6 @@ class FlexiForm extends Page
 
     private static $db = array();
 
-
-
     private static $has_many = array(
         'Submissions'
     );
@@ -41,13 +39,28 @@ class FlexiForm extends Page
         return parent::populateDefaults();
     }
 
-
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
 
         if ($this->ID) {
-            $fields->addFieldToTab($this->flexiform_tab, $this->getFlexiGridField());
+
+            $config = new GridFieldConfig_FlexiForm();
+
+            // Multi-Class Add Button
+            /////////////////////////
+            $classes = array();
+            foreach($this->allowed_field_types as $className) {
+                $class = singleton($className);
+                $classes[$className] = "{$class->Label()} Field";
+            }
+
+            $component = $config->getComponentByType('GridFieldAddNewMultiClass');
+            $component->setClasses($classes);
+            $component->setTitle('Add Field');
+
+
+            $fields->addFieldToTab($this->flexiform_tab, new GridField('FlexiForm', 'Form Fields', $this->Fields(), $config));
         } else {
             $fields->addFieldToTab($this->flexiform_tab, new LiteralField('FlexiForm', '<p>Please save before editing the form.</p>'));
         }
@@ -55,31 +68,30 @@ class FlexiForm extends Page
         return $fields;
     }
 
-    public function validate() {
+    public function validate()
+    {
         $result = parent::validate();
 
         $names = array();
-        if($result->valid()) {
-            foreach($this->Fields() as $field) {
+        if ($result->valid()) {
+            foreach ($this->Fields() as $field) {
 
-                if(empty($field->Name)) {
+                if (empty($field->Name)) {
                     $result->error("Field names cannot be blank. Encountered a blank {$field->Label()} field.");
                     break;
                 }
 
-
-                if(in_array($field->Name,$names)) {
+                if (in_array($field->Name, $names)) {
                     $result->error("Field Names must be unique per form. {$field->Name} was encountered twice.");
                     break;
+                } else {
+                    $names[] = $field->Name;
                 }
-                $names[] = $field->Name;
 
-                $field_options = $field->Options();
-                if(!empty($field->DefaultValue) && $field_options->exists()) {
-                    if(!in_array($field->DefaultValue,$field_options->column('Value'))) {
-                        $result->error("The default value of {$field->Name} must exist as an option value");
-                        break;
-                    }
+                $default_value = $field->DefaultValue;
+                if (! empty($default_value) && $field->Options()->exists() && ! in_array($default_value, $field->Options()->column('Value'))) {
+                    $result->error("The default value of {$field->getName()} must exist as an option value");
+                    break;
                 }
             }
         }
@@ -112,48 +124,8 @@ class FlexiForm extends Page
             $fields->push($field);
         }
     }
-
-    public function getFlexiGridField()
-    {
-        $config = new GridFieldConfig_FlexiForm();
-
-        // Sort Order
-        /////////////
-        $config->addComponent(new GridFieldOrderableRows('SortOrder'));
-
-
-        // Multi-Class Add Button
-        /////////////////////////
-        $classes = array();
-        foreach($this->allowed_field_types as $className) {
-            $class = singleton($className);
-            $classes[$className] = "{$class->Label()} Field";
-        }
-
-        $component = $config->getComponentByType('GridFieldAddNewMultiClass');
-        $component->setClasses($classes);
-        $component->setTitle('Add Field');
-
-        // Inline Editing
-        /////////////////
-        $component = $config->getComponentByType('GridFieldEditableColumns');
-        $component->setDisplayFields(array(
-            'Label' => array('title' => 'Type', 'field' => 'ReadonlyField'),
-            'Name' => array('title' => 'Name', 'field' => 'TextField'),
-            'Prompt' => array('title' => 'Prompt', 'field' => 'TextField'),
-            'DefaultValue' => array('title' => 'Default Value', 'field' => 'TextField'),
-            'OptionsPreview' => array('title' => 'Options', 'field' => 'ReadonlyField'),
-            'Required' => array('title' => 'Required', 'field' => 'CheckboxField'),
-        ));
-
-
-        return new GridField('FlexiForm', 'Form Fields', $this->Fields(), $config);
-    }
-
-
 }
 
 class FlexiForm_Controller extends Page_Controller
 {
-
 }

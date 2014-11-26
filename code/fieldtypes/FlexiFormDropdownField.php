@@ -11,11 +11,6 @@ class FlexiFormDropdownField extends FlexiFormOptionField {
         'EmptyString' => 'Varchar'
     );
 
-    public function populateDefaults(){
-        $this->EmptyString = $this->default_empty_string;
-        return parent::populateDefaults();
-    }
-
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
@@ -26,6 +21,9 @@ class FlexiFormDropdownField extends FlexiFormOptionField {
     }
 
 
-
+    public function getEmptyString(){
+        $value = $this->getField('EmptyString');
+        return (empty($value)) ? $this->default_empty_string : $value;
+    }
 
 }
