@@ -9,10 +9,15 @@ Notes
 =====
 * FlexiForms extend `Page` , similar to userforms module
 * Fields extend `FlexiFormField`, simple dataobjects
-* Fields are related to Forms via *many_many* relationship so they can be used 
+* Fields are related to Forms via **many_many** relationship so they can be used 
   * Field Name, Prompt, Default Value, and Requried/Validations are defined via _many_many_extraFields_
   * this encourages sharing of fields between forms, may create custom built-in field types(?)
   
+
+Requirements
+============
+
+GridFieldExtensions patched https://github.com/briceburg/silverstripe-gridfieldextensions
   
 Event Registration Page Example
 ===============================
