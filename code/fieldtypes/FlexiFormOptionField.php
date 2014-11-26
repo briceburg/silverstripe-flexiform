@@ -44,8 +44,10 @@ class FlexiFormOptionField extends FlexiFormField
 
     public function getDefaultValueFormField($field_name = 'FieldDefaultValue')
     {
-        $field = new DropdownField($field_name, 'Default Value');
-        $field->setSource($this->Options()->map('Value','Label')->toArray());
+        $field = new DropdownField($field_name, 'Default Value', array());
+        if($this->Options()->exists()) {
+            $field->setSource($this->Options()->map('Value','Value')->toArray());
+        }
         $field->setEmptyString('None (Displays Empty String)');
 
         $field->description = 'Optional. This value will be preselectd.';
