@@ -103,7 +103,9 @@ class FlexiFormField extends DataObject
 
     public function getDefaultValue(){
         $value = $this->getField('DefaultValue');
-        return (empty($value)) ? $this->FieldDefaultValue : $value;
+        $name = $this->getField('Name');
+        // && empty($name) ensures DefaultValue is set only once, and subsequent allows empty values.
+        return (empty($value) && empty($name)) ? $this->FieldDefaultValue : $value;
     }
 
     public function getName(){
