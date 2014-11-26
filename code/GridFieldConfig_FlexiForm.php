@@ -104,6 +104,11 @@ class GridFieldConfig_FlexiFormOption extends GridFieldConfig
                 'field' => 'TextField'
             )
         ));
+
+        // Sort Order
+        // ///////////
+        $this->addComponent(new GridFieldOrderableRows('SortOrder'));
+
     }
 
     // @todo reintroduce custom handlers to set name/default value only once

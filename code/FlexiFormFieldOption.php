@@ -4,11 +4,16 @@ class FlexiFormFieldOption extends DataObject {
 
     private static $db = array(
         'Label' => 'Varchar',
-        'Value' => 'Varchar'
+        'Value' => 'Varchar',
+        'SortOrder' => 'Int'
     );
 
     private static $has_one = array(
         'Field' => 'FlexiFormField'
+    );
+
+    private static $default_sort = array(
+        'SortOrder'
     );
 
 
