@@ -9,8 +9,6 @@ class FlexiFormField extends DataObject
 
     protected $field_description = 'Override Me';
 
-    protected $field_has_options = false;
-
     private static $db = array(
         'FieldName' => 'Varchar(16)',
         'FieldDefaultValue' => 'Varchar'
@@ -40,6 +38,9 @@ class FlexiFormField extends DataObject
     {
         $fields = parent::getCMSFields();
 
+        $fields->removeByName('Options');
+        $fields->removeByName('FlexiForms');
+
         $field = $fields->dataFieldByName('FieldName');
         $field->setTitle('Name');
         $field->setMaxLength(16);
@@ -51,35 +52,6 @@ class FlexiFormField extends DataObject
 
         $field = new LiteralField('Description', "<strong>{$this->field_label} Field &mdash;</strong> {$this->field_description} <hr />");
         $fields->addFieldToTab('Root.Main', $field, 'FieldName');
-
-        $fields->removeByName('Options');
-        if ($this->field_has_options) {
-            $config = new GridFieldConfig_FlexiForm();
-            $config->removeComponentsByType('GridFieldAddNewMultiClass');
-            $config->removeComponentsByType('FlexiFormAddExistingAutocompleter');
-            $config->removeComponentsByType('GridFieldEditButton');
-            $config->removeComponentsByType('GridFieldDeleteAction');
-            $config->removeComponentsByType('GridFieldDetailForm');
-            $config->addComponent(new GridFieldDeleteAction(false));
-
-            $component = new GridFieldAddNewInlineButton();
-            $component->setTitle('Add Option');
-            $config->addComponent($component);
-
-            $component = $config->getComponentByType('GridFieldEditableColumns');
-            $component->setDisplayFields(array(
-                'Value' => array(
-                    'title' => 'Value (required)',
-                    'field' => 'TextField'
-                ),
-                'Label' => array(
-                    'title' => 'Label (optional, defaults to Value)',
-                    'field' => 'TextField'
-                )
-            ));
-
-            $fields->addFieldToTab('Root.Main', new GridField('Options', 'Options', $this->Options(), $config));
-        }
 
         return $fields;
     }
@@ -122,13 +94,7 @@ class FlexiFormField extends DataObject
 
     public function OptionsPreview()
     {
-        $preview = array();
-        if ($this->field_has_options) {
-            $field = DBField::create_field('Text', implode(', ', $this->Options()->column('Value')));
-            return $field->LimitCharacters(24);
-        }
-
-        return 'n/a';
+        return '-';
     }
 
     public function getTitle() {

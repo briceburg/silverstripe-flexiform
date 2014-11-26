@@ -41,6 +41,7 @@ class FlexiForm extends Page
         return parent::populateDefaults();
     }
 
+
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
@@ -52,6 +53,37 @@ class FlexiForm extends Page
         }
 
         return $fields;
+    }
+
+    public function validate() {
+        $result = parent::validate();
+
+        $names = array();
+        if($result->valid()) {
+            foreach($this->Fields() as $field) {
+
+                if(empty($field->Name)) {
+                    $result->error("Field names cannot be blank. Encountered a blank {$field->Label()} field.");
+                    break;
+                }
+
+
+                if(in_array($field->Name,$names)) {
+                    $result->error("Field Names must be unique per form. {$field->Name} was encountered twice.");
+                    break;
+                }
+                $names[] = $field->Name;
+
+                $field_options = $field->Options();
+                if(!empty($field->DefaultValue) && $field_options->exists()) {
+                    if(!in_array($field->DefaultValue,$field_options->column('Value'))) {
+                        $result->error("The default value of {$field->Name} must exist as an option value");
+                        break;
+                    }
+                }
+            }
+        }
+        return $result;
     }
 
     public function addFieldType($className)
@@ -117,10 +149,11 @@ class FlexiForm extends Page
 
         return new GridField('FlexiForm', 'Form Fields', $this->Fields(), $config);
     }
+
+
 }
 
 class FlexiForm_Controller extends Page_Controller
 {
 
-}
 }
