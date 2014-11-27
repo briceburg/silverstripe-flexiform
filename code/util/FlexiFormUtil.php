@@ -66,4 +66,30 @@ class FlexiFormUtil
 
         return $field;
     }
+
+    public static function AutoCreateFlexiField($field_type, $definition){
+
+        $readonly = (isset($definition['Readonly']) && $definition['Readonly']);
+
+        $filter = array(
+            'FieldName' => $definition['Name'],
+            'Readonly' => $readonly
+        );
+
+        // allow same names on non readonly fields if they're different classes
+        if(!$readonly) {
+            $filter['ClassName'] = $field_type;
+        }
+
+        // only create field if it's name doesn't yet exist
+        if (! FlexiFormField::get()->filter($filter)->first()) {
+
+            if ($field = FlexiFormUtil::CreateFlexiField($field_type, $definition)) {
+                $prefix = ($field->Readonly) ? 'Readonly' : 'Normal';
+                DB::alteration_message(
+                "flexiforms - Created $prefix $field_type named `{$field->FieldName}`.",
+                "created");
+            }
+        }
+    }
 }

@@ -59,7 +59,7 @@ class FlexiFormField extends DataObject
             "<strong>{$this->field_label} Field &mdash;</strong> {$this->field_description} <hr />");
         $fields->addFieldToTab('Root.Main', $field, 'FieldName');
 
-        if($this->Readonly) {
+        if ($this->Readonly) {
             $fields = $fields->transform(new ReadonlyTransformation());
         }
 
@@ -139,39 +139,15 @@ class FlexiFormField extends DataObject
 
     public function requireDefaultRecords()
     {
-        // if this field has a definition, attempt to create it
-        $definitions = $this->getFlexiFieldDefinitions();
-
-        foreach($this->getFlexiFieldDefinitions() as $definition) {
-
-            $field_type = $this->ClassName;
-
-            $readonly = (isset($definition['Readonly']) && $definition['Readonly']);
-
-            $filter = array(
-                'FieldName' => $definition['Name'],
-                'Readonly' => $readonly
-            );
-
-            // allow same names on non readonly fields if they're different classes
-            if(!$readonly) {
-                $filter['ClassName'] = $field_type;
-            }
-
-            // only create field if it's name doesn't yet exist
-            if (! FlexiFormField::get()->filter($filter)->first()) {
-
-                if ($field = FlexiFormUtil::CreateFlexiField($field_type, $definition)) {
-                    $prefix = ($field->Readonly) ? 'Readonly' : 'Normal';
-                    DB::alteration_message(
-                    "flexiforms - Created $prefix $field_type named `{$field->FieldName}`.",
-                    "created");
-                }
-            }
-
-
+        foreach ($this->getFlexiFieldDefinitions() as $definition) {
+            FlexiFormUtil::AutoCreateFlexiField($this->ClassName, $definition);
         }
 
+        if($yml_definitions = Config::inst()->get($this->ClassName, 'field_definitions')) {
+            foreach ($yml_definitions as $definition) {
+                FlexiFormUtil::AutoCreateFlexiField($this->ClassName, $definition);
+            }
+        }
         return parent::requireDefaultRecords();
     }
 
