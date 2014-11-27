@@ -44,18 +44,6 @@ Basic Usage
 By default, Flexi Forms can be created and deleted by anyone with access to
 create or delete Pages. 
 
-You can disallow the creation and deletion of Flexi Forms through YAML 
-configuration, or by overloading the **canCreate** and **canDelete** methods of
-Custom Form classes.
-
-E.g. add the following to mysite/config/config.yml
-```
----
-FlexiForm:
-  can_create: false
-  can_delete: false
-  
-```
 
 Custom Forms
 ------------
@@ -143,6 +131,38 @@ class MyForm extends FlexiForm {
   }
 
 }
+```
+
+### Allow only your Custom Form to be created
+
+
+Disallow the creation and deletion of Flexi Forms through YAML 
+configuration. E.g. add the following to mysite/config/config.yml
+
+```
+---
+FlexiForm:
+  can_create: false
+  can_delete: false
+  
+```
+
+Then, in your Custom Form class, override the **canCreate** and **canDelete**
+methods.
+
+```php
+class MyForm extends FlexiForm {
+
+  public function canCreate($member = null) {
+    return singleton('Page')->canCreate($member);
+  }
+
+  public function canDelete($member = null) {
+    return singleton('Page')->canDelete($member);
+  }
+
+}
+
 ```
  
 ### Automatically adding fields to a form
