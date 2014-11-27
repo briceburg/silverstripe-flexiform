@@ -167,35 +167,19 @@ class MyForm extends FlexiForm {
  
 ### Automatically adding fields to a form
 
-Fields can be programatically defined and added to newly created forms. This
-is helpful when many similar forms are created (such as the a Registration
-Form for an Event). Because FlexiForms features shared fields via many_many 
-relationships, you can re-use a field over and over.
+Fields can be programatically defined and added to newly created forms. Because 
+FlexiForms features shared fields via many_many relationships, you can reuse a 
+field over and over. This all greatly reduces administrative repetitiveness and 
+improves consistency.
 
-
-This all greatly reduces administrative repetitiveness and improves
-consistency.
-
-
-NOTE: Field settings are controlled as _extrafields_, allowing per-form 
-customization without disturbing other forms using the same field.
-
-
-Default fields definitions are set in the **$default_flexi_fields** property,
-fetched with **getDefaultFlexiFields**, and manipulated with **setDefaultFlexiFields**.
-
-Field definitions are contained in an _Array_. 
-
-* If the array value is a string, the field whose Name matches the value will
-be linked to the form. 
- * This combines well with _System Fields_, as their name cannot change.
- 
+* Field definitions are defined in an _Array_
+* If the array value is a string, the field whose Name matches the value will be linked to the form. 
 * If the value is an array, a field will be created from the array components.
   * Name and Type are required. 
   * If supplying Options, use Value as array Key and Label as array Value .
   
 
-* Strategy 1: Overload **$flexiform_tab** in your custom form
+* Strategy 1: Overload **$default_flexi_fields** in your custom form
 
 ```php
 class AuthorChoiceForm extends FlexiForm {
