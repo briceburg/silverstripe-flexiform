@@ -19,7 +19,7 @@ Features
 * **Many-many** relationship between Forms and Fields
   * Reduces administrative repetitiveness and improves consistency. 
   * Field settings are controlled as _extrafields_, allowing per-form customization without disturbing other forms using the same field.
-* Ability to create System Field types, automatically built during /dev/build  
+* Ability to define System Field types, automatically created during /dev/build  
 * Compatible with  [holder pages](https://github.com/briceburg/silverstripe-holderpage) + VersionedGridfield
  
 
@@ -32,6 +32,7 @@ Usage
 =====
 
 `FlexiForm` - Extends the _Page_ class. 
+
 `FlexiFormField` - Base class all FlexiFormField types extend from.
 
 Basic Usage
@@ -46,16 +47,17 @@ Custom Forms
 
 The behavior of a `FlexiForm` is customized through subclasses. 
 
-* Create a custom Form class extending `FlexiForm`
+* Create a Custom Form by extending `FlexiForm`
 * Flush the cache to register it in your manifest.
 
-Most default behavior is controlled by visible protected properties, and 
-manipulated with getters and setters.
+Default behavior is controlled by visible protected properties, and 
+manipulated with getters and setters. 
 
-For instance, A form's allowed field types are retrieved by the 
-**getAllowedFlexiTypes** method of the `FlexiForm` class. This method returns 
-the protected **$allowed_flexi_types** property of, which can be manipulated 
-with the **setAllowedFlexiTypes** and **addAllowedFlexiType** methods.
+For instance, A form's allowed field types 
+are retrieved by the **getAllowedFlexiTypes** method of the `FlexiForm` class. 
+This method returns the protected **$allowed_flexi_types** property, which 
+can be manipulated with **setAllowedFlexiTypes**, and fetched with
+**addAllowedFlexiType**.
 
 This approach allots flexibility and enables different strategies to accomplish 
 behavioral needs.
@@ -65,7 +67,7 @@ behavioral needs.
 
 The choice of fields can be limited on a per form basis. Here's a couple examples. 
 
-1. Overload **$allowed_flexi_types** in your custom form
+* Strategy 1: Overload **$allowed_flexi_types** in your custom form
 
 ```php
 class MyForm extends FlexiForm {
@@ -78,7 +80,7 @@ class MyForm extends FlexiForm {
 }
 ```
 
-2. Append a custom type via *addAllowedFlexiType**
+* Strategy 2: Append a custom type via **addAllowedFlexiType**
 
 ```php
 class MyForm extends FlexiForm {
@@ -101,7 +103,7 @@ by default. It is manipulated with the **setFlexiFormTab**, and retreived via
 **getFlexiFormTab**.
 
 
-1. Overload **$flexiform_tab** in your custom form
+* Strategy 1: Overload **$flexiform_tab** in your custom form
 
 ```php
 class MyForm extends FlexiForm {
@@ -111,7 +113,7 @@ class MyForm extends FlexiForm {
 }
 ```
 
-2. Set via  **setFlexiFormTab** 
+* Strategy 2: Set via  **setFlexiFormTab** 
 
 ```php
 class MyForm extends FlexiForm {
@@ -158,7 +160,7 @@ be linked to the form.
   * If supplying Options, use Value as array Key and Label as array Value .
   
 
-1. Overload **$flexiform_tab** in your custom form
+* Strategy 1: Overload **$flexiform_tab** in your custom form
 
 ```php
 class AuthorChoiceForm extends FlexiForm {
@@ -182,7 +184,12 @@ class AuthorChoiceForm extends FlexiForm {
 }
 ```
 
-2. Set via  **setDefaultFlexiFields** 
+* Strategy 2: Set via  **setDefaultFlexiFields** 
+
+
+_This example assumes that fields named FirstName, LastName, and Email 
+already exist. Perhaps by manually being created or better yet - created
+as a System Field_
 
 ```php
 class Event extends FlexiForm {
@@ -203,10 +210,6 @@ class Event extends FlexiForm {
 
 }
 ```
-
-_This example assumes that fields named FirstName, LastName, and Email 
-already exist. Perhaps by manually being created or better yet - created
-as a System Field_
 
   
 Custom Fields
