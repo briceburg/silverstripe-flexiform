@@ -18,8 +18,8 @@ Features
   * Limit allowed field types per form
 * **Many-many** relationship between Forms and Fields
   * Reduces administrative repetitiveness and improves consistency. 
-  * Field settings are controlled as _extrafields_, allowing per-form customization without disturbing other forms using the same field.
-* Ability to define System Field types, automatically created during /dev/build  
+  * Settings are stored as _many_many_extraFields_, allowing per-form customization without disturbing other forms using the same field.
+* Automatically create fields in the Environment Builder (during /dev/build)  
 * Compatible with  [holder pages](https://github.com/briceburg/silverstripe-holderpage) + VersionedGridfield
  
 
@@ -173,10 +173,10 @@ field over and over. This all greatly reduces administrative repetitiveness and
 improves consistency.
 
 * Field definitions are defined in an _Array_
-* If the array value is a string, the field whose Name matches the value will be linked to the form. 
-* If the value is an array, a field will be created from the array components.
-  * Name and Type are required. 
-  * If supplying Options, use Value as array Key and Label as array Value .
+  * If the array value is a string, the field whose Name matches the value will be linked to the form.
+  * If the value is an array, a field will be created from the array components.
+    * Name and Type are required. 
+    * If supplying Options, use Value as array Key and Label as array Value .
   
 
 * Strategy 1: Overload **$default_flexi_fields** in your custom form
@@ -208,7 +208,7 @@ class AuthorChoiceForm extends FlexiForm {
 
 _This example assumes that fields named FirstName, LastName, and Email 
 already exist. Perhaps by manually being created or better yet - created
-as a System Field_
+as a Readonly fields during /dev/build_
 
 ```php
 class Event extends FlexiForm {
@@ -234,7 +234,80 @@ class Event extends FlexiForm {
 Custom Fields
 -------------
 
-Documentation coming soon....
+New custom fields can be created by subclassing FlexiFormField types.
+* If your field has selectable options (like a Dropdown), extend the `FlexiFormOptionField` type.
+* If your field does not have selectable options (like an Email), extend the `FlexiFormField` type.
+* Alternatively, extend the existing type that best matches your behavior.
 
-  
-  
+See the existing [fieldtypes](https://github.com/briceburg/silverstripe-flexiforms/tree/master/code/fieldtypes) for examples.
+
+
+
+
+TODO: frontend field documentation &c.
+
+### Programmatically adding fields
+
+You can use the Environment Builder (/dev/build) to automatically create fields.
+**Any FlexiFormField with a valid $field_definition will be created**. If a
+field with the same name already exists, it will not be created.
+
+@TODO for normal fields - allow same name, but enforce unique per class?
+
+* First, create your Custom Field with a valid **$field_definition** property.
+```php
+class FlexiAuthorField extends FlexiFormOptionField
+{
+    protected $field_definition = array(
+        'Name' => 'Author',
+        'Type' => 'FlexiFormDropdownField',
+        'EmptyString' => 'Select your favorite Author',
+        'Options' => array(
+            'Balzac' => 'Honoré de Balzac',
+            'Dumas' => 'Alexandre Dumas',
+            'Flaubert' => 'Gustave Flaubert',
+            'Hugo' => 'Victor Hugo',
+            'Verne' => 'Jules Verne',
+            'Voltaire' => 'Voltaire'
+        )
+    );
+
+}
+```
+* Second, execute the Environment Builder (e.g. by visiting /dev/build)
+
+
+### Readonly fields
+
+By default, all fields are editable. The CMS administrator can change the base
+field name, the list of selectable options, etc. etc. This flexibility could be 
+unwanted in certain situations. 
+
+For instance, pretend you have a Custom Form that specifies a field named 
+'Email' in  _$default_flexi_fields_. Soon after, the admin renamed the 'Email' 
+field to 'WorkEmail'. Now, whenever the Custom Form is created, a Validation 
+Exception will occur complainging that the 'Email' field is not found. 
+
+Readonly fields are a great way to protect against this. They are different from
+normal fields as follows;
+* **Readonly fields have their FieldName, FieldDefaultValue, and Options locked**
+* **Readonly fields are marked with an asterix (*) when searched for**
+* **Readonly fields must be created programmatically**
+* **Readonly fields must have a unique FieldName**
+  * Normal fields can share names. For instance you could have a 
+`FlexiFormCheckboxField` named 'ShoeSize' as well as a `FlexiFormTextField` 
+also named 'ShoeSize'.
+
+
+```php
+class FlexiAuthorField extends FlexiFormOptionField
+{
+    protected $field_definition = array(
+        'Name' => 'Author',
+        'Readonly' => true, // locks field as readonly, ensures Name is unique
+        ...
+    );
+
+}
+```
+
