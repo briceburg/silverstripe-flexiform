@@ -35,6 +35,10 @@ class FlexiFormUtil
             throw new ValidationException($definition['Type'] . ' is an unknown FlexiFormField Type');
         }
 
+        if(isset($definition['Options']) && !singleton($definition['Type'])->is_a('FlexiFormOptionField')) {
+            throw new ValidationException($definition['Type'] . ' must subclass FlexiFormOptionField to contain options');
+        }
+
         $field = new $definition['Type']();
         $field->FieldName = $definition['Name'];
 
