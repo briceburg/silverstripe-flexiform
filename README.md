@@ -1,115 +1,218 @@
 silverstripe-flexiforms
 =======================
 
-GridField friendly, CMS configurable forms. 
+Add configurable forms to your pages. Features intuitive GridField based management of fields and submissions through the CMS.
 
-Work in progress. Pre-Release.
+**Work in progress. Pre-Release. Field Management is pretty much in place, need to finish
+submission handling and frontend work.**
 
-Notes
-=====
-* FlexiForms extend `Page` , similar to userforms module
-* Fields extend `FlexiFormField`, simple dataobjects
-* Fields are related to Forms via **many_many** relationship so they can be used 
-  * Field Name, Prompt, Default Value, and Requried/Validations are defined via _many_many_extraFields_
-  * this encourages sharing of fields between forms, may create custom built-in field types(?)
-  
+Features
+--------
+
+* GridField management of fields, field options, and submissions.
+* Extensible Field Types (`FlexiFormField`)
+  * Text, Email, Select, Checkbox, Radio, and Checkbox Set field types out-of-box.
+  * Easily create new FlexiFormField types
+* Extensible Forms (`FlexiForm`)
+  * Programmatically define initial fields added to newly created forms
+  * Limit allowed field types per form
+* **Many-many** relationship between Forms and Fields
+  * Reduces administrative repetitiveness and improves consistency. 
+  * Field settings are controlled as _extrafields_, allowing per-form customization without disturbing other forms using the same field.
+* Ability to create System Field types, automatically built during /dev/build  
+* Compatible with  [holder pages](https://github.com/briceburg/silverstripe-holderpage) + VersionedGridfield
+ 
 
 Requirements
 ============
 
-GridFieldExtensions patched https://github.com/briceburg/silverstripe-gridfieldextensions
-  
-Event Registration Page Example
-===============================
+The venerable GridFieldExtensions https://github.com/ajshort/silverstripe-gridfieldextensions
 
-NOTE: Actual fields are controlled in the CMS. Will come up with a method to programatically assign default fields. 
+Usage 
+=====
 
-```
-<?php
+`FlexiForm` - Extends the _Page_ class. 
+`FlexiFormField` - Base class all FlexiFormField types extend from.
 
-class Event extends FlexiForm
-{
-    protected $flexiform_tab = 'Root.Registration';
-    private static $default_parent = 'EventsPage';
+Basic Usage
+-----------
 
-    private static $db = array(
-        'Date' => 'SS_Datetime',
-        'Timezone' => "Enum(array('EST', 'CST', 'PST', 'MST'))",
-        'AllowRegistration' => 'Boolean',
-        'RegistrationCutoff' => 'TinyInt'
-    );
-
-    private static $summary_fields = array(
-        'Title' => 'Event',
-        'DateTime' => 'Date/Time',
-        'AllowRegistration.Nice' => 'Allow Registration',
-    );
-
-    private static $default_sort = "Date desc";
+1. Add a "Flexi Form" Page to the SiteTree
+1. Save the page and configure fields via the __Form__ tab
 
 
-    public function populateDefaults()
-    {
-        $this->Date = date('Y-m-d 08:00:00');
-        $this->Timezone = 'EST';
-        $this->AllowRegistration = false;
+Custom Forms
+------------
 
-        return parent::populateDefaults();
-    }
+The behavior of a `FlexiForm` is customized through subclasses. 
 
-    public function getCMSFields()
-    {
-        $fields = parent::getCMSFields();
+* Create a custom Form class extending `FlexiForm`
+* Flush the cache to register it in your manifest.
 
-        $field = new DatetimeField('Date','Date');
-        $field->setTimeField(new TimePickerField('Date[time]',""));
-        $field->getDateField()->setConfig('showcalendar', 1);
-        $field->getTimeField()->setConfig('timeformat', 'hh:mm a');
-        $field->getTimeField()->setTimePickerConfig('showPeriod',1);
+Most default behavior is controlled by visible protected properties, and 
+manipulated with getters and setters.
 
+For instance, A form's allowed field types are retrieved by the 
+**getAllowedFlexiTypes** method of the `FlexiForm` class. This method returns 
+the protected **$allowed_flexi_types** property of, which can be manipulated 
+with the **setAllowedFlexiTypes** and **addAllowedFlexiType** methods.
 
-        $fields->addFieldsToTab('Root.Main',array(
-            $field,
-            new DropdownField('Timezone','Timezone',$this->dbObject('Timezone')->enumValues()),
-        ),'Content');
+This approach allots flexibility and enables different strategies to accomplish 
+behavioral needs.
 
 
-        // Registration Form
-        ////////////////////
+### Limiting Field Types
 
-        // place fields above FlexiForm
-        $fields->addFieldsToTab($this->flexiform_tab,array(
-            new CheckboxField('AllowRegistration'),
-            $cutoff = new DropdownField('RegistrationCutoff','Registration Cutoff'),
-        ),'FlexiForm');
+The choice of fields can be limited on a per form basis. Here's a couple examples. 
 
-        $cutoff->setSource(array(
-            0 => 'None',
-            1 => '1 Day',
-            2 => '2 Days',
-            3 => '3 Days',
-            4 => '4 Days',
-            5 => '5 Days',
-            6 => '6 Days',
-            7 => '1 Week',
-            14 => '2 Weeks'
-        ));
+1. Overload **$allowed_flexi_types** in your custom form
 
-        $cutoff->description = 'Days before Event to stop taking registrations';
+```php
+class MyForm extends FlexiForm {
 
-        return $fields;
-    }
+  protected $allowed_flexi_types = array(
+    'FlexiFormTextField',
+    'FlexiFormDropdownField'
+  );
 
-    public function getDateTime() {
-        return $this->dbObject('Date')->format('m/d/Y g:i a') . ' ' . $this->Timezone;
-    }
-}
-
-class Event_Controller extends FlexiForm_Controller
-{
 }
 ```
+
+2. Append a custom type via *addAllowedFlexiType**
+
+```php
+class MyForm extends FlexiForm {
+
+  public function getCMSFields()
+  {
+    $this->addAllowedFlexiType('MyCustomFlexiFormField');
+    
+    $fields = parent::getCMSFields();
+    
+    return $fields;
+   }
+}
+```
+
+### Changing the Tab FlexiForm appears in
+
+The tab a FlexiForm appears in is controlled by  the **$flexiform_tab** property 
+by default. It is manipulated with the **setFlexiFormTab**, and retreived via
+**getFlexiFormTab**.
+
+
+1. Overload **$flexiform_tab** in your custom form
+
+```php
+class MyForm extends FlexiForm {
+
+  protected $flexiform_tab = 'Root.Main';
+
+}
+```
+
+2. Set via  **setFlexiFormTab** 
+
+```php
+class MyForm extends FlexiForm {
+
+  public function getCMSFields()
+  {
+    $this->setFlexiFormTab('Root.Registration');
+    
+    $fields = parent::getCMSFields();
+    
+    return $fields;
+  }
+
+}
+```
+ 
+### Automatically adding fields to a form
+
+Fields can be programatically defined and added to newly created forms. This
+is helpful when many similar forms are created (such as the a Registration
+Form for an Event). Because FlexiForms features shared fields via many_many 
+relationships, you can re-use a field over and over.
+
+
+This all greatly reduces administrative repetitiveness and improves
+consistency.
+
+
+NOTE: Field settings are controlled as _extrafields_, allowing per-form 
+customization without disturbing other forms using the same field.
+
+
+Default fields definitions are set in the **$default_flexi_fields** property,
+fetched with **getDefaultFlexiFields**, and manipulated with **setDefaultFlexiFields**.
+
+Field definitions are contained in an _Array_. 
+
+* If the array value is a string, the field whose Name matches the value will
+be linked to the form. 
+ * This combines well with _System Fields_, as their name cannot change.
+ 
+* If the value is an array, a field will be created from the array components.
+  * Name and Type are required. 
+  * If supplying Options, use Value as array Key and Label as array Value .
   
+
+1. Overload **$flexiform_tab** in your custom form
+
+```php
+class AuthorChoiceForm extends FlexiForm {
+
+ protected $default_flexi_fields = array(
+   'Email',   // will link the existing field with Name "Email"
+   array(     // creates a new field to spec
+     'Name' => 'Author',
+     'Type' => 'FlexiFormDropdownField',
+     'EmptyString' => 'Select your favorite Author',
+     'Options' => array(
+       'Balzac' => 'Honoré de Balzac',
+       'Dumas' => 'Alexandre Dumas',
+       'Flaubert' => 'Gustave Flaubert',
+       'Hugo' => 'Victor Hugo',
+       'Verne' => 'Jules Verne',
+       'Voltaire' => 'Voltaire')
+    )
+  );
+
+}
+```
+
+2. Set via  **setDefaultFlexiFields** 
+
+```php
+class Event extends FlexiForm {
+
+  public function getCMSFields()
+  {
+    $this->setFlexiFormTab('Root.Registration');
+    $this->setDefaultFlexiFields(array(
+      'FirstName',
+      'LastName',
+      'Email'
+    ));
+    
+    $fields = parent::getCMSFields();
+    
+    return $fields;
+  }
+
+}
+```
+
+_This example assumes that fields named FirstName, LastName, and Email 
+already exist. Perhaps by manually being created or better yet - created
+as a System Field_
+
   
+Custom Fields
+-------------
+
+Documentation coming soon....
+
   
   
