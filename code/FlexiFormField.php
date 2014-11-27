@@ -163,4 +163,11 @@ class FlexiFormField extends DataObject
 
         return parent::requireDefaultRecords();
     }
+
+    private static $indexes = array(
+        'FLEXI_READONLY' => array(
+            'type' => 'index',
+            'value' => 'Readonly'
+        )
+    );
 }
