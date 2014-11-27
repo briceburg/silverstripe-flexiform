@@ -5,6 +5,41 @@ class FlexiForm extends Page
 
     protected $flexiform_tab = 'Root.Form';
 
+    /**
+     * An array of fields to prepopulate this newly created form with.
+     *
+     * If the value is a string, the field whose Name matches the value will
+     * be linked to the form. This combines well with _System Fields_, as their
+     * name cannot change.
+     *
+     * If the value is an array, a field will be created from the components
+     * of the array. Name and Type are required. If supplying Options,
+     * use Value as array Key and Label as array Value .
+     *
+     * e.g.
+     *
+
+     protected $default_flexi_fields = array(
+        'Email',   // will link the existing field with Name "Email"
+        array(     // creates a new field to spec
+            'Name' => 'Author',
+            'Type' => 'FlexiFormDropdownField',
+            'EmptyString' => 'Select your favorite Author',
+            'Options' => array(
+                'Balzac' => 'Honoré de Balzac',
+                'Dumas' => 'Alexandre Dumas',
+                'Flaubert' => 'Gustave Flaubert',
+                'Hugo' => 'Victor Hugo',
+                'Verne' => 'Jules Verne',
+                'Voltaire' => 'Voltaire')
+        )
+     );
+
+     *
+     * @var Array $flexi_field_definitions
+     */
+    protected $default_flexi_fields = array();
+
     private static $db = array();
 
     private static $has_many = array(
@@ -124,6 +159,16 @@ class FlexiForm extends Page
         return $this->allowed_flexi_types = $classNames;
     }
 
+    public function getDefaultFlexiFields()
+    {
+        return $this->default_flexi_fields;
+    }
+
+    public function setDefaultFlexiFields(Array $flexi_field_definitions)
+    {
+        return $this->default_flexi_fields = $flexi_field_definitions;
+    }
+
     public function getFrontEndFlexiFormFields()
     {
         $fields = new FieldList();
@@ -131,6 +176,33 @@ class FlexiForm extends Page
         foreach ($this->FlexiFields() as $field) {
             $fields->push($field);
         }
+    }
+
+    public function onAfterWrite()
+    {
+        if ($this->isChanged('ID')) {
+            // this is a newly created form, prepopulate fields
+
+
+            $fields = $this->FlexiFields();
+            foreach ($this->getDefaultFlexiFields() as $flexi_field_definition) {
+
+                if (is_string($flexi_field_definition)) {
+
+                    if (! $field = FlexiFormField::get()->filter('FieldName', $flexi_field_definition)->first()) {
+                        throw new ValidationException("No field found by name '$flexi_field_definition'");
+                    }
+                } elseif (is_array($flexi_field_definition)) {
+                    $field = FlexiFormUtil::CreateFlexiField($flexi_field_definition);
+                } else {
+                    throw new ValidationException('Unknown Field Definition Encountered');
+                }
+
+                $fields->add($field);
+            }
+        }
+
+        return parent::onAfterWrite();
     }
 }
 
