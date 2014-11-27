@@ -94,10 +94,10 @@ class FlexiForm extends Page
             $component->setClasses($classes);
             $component->setTitle('Create New Field');
 
-            $fields->addFieldToTab($this->flexiform_tab,
+            $fields->addFieldToTab($this->getFlexiFormTab(),
                 new GridField('FlexiForm', 'Form Fields', $this->FlexiFields(), $config));
         } else {
-            $fields->addFieldToTab($this->flexiform_tab,
+            $fields->addFieldToTab($this->getFlexiFormTab(),
                 new LiteralField('FlexiForm', '<p>Please save before editing the form.</p>'));
         }
 
@@ -168,6 +168,18 @@ class FlexiForm extends Page
     {
         return $this->default_flexi_fields = $flexi_field_definitions;
     }
+
+
+    public function getFlexiFormTab()
+    {
+        return $this->flexiform_tab;
+    }
+
+    public function setFlexiFormTab($tab_name)
+    {
+        return $this->flexiform_tab = $tab_name;
+    }
+
 
     public function getFrontEndFlexiFormFields()
     {
