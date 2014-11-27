@@ -69,9 +69,12 @@ class FlexiForm extends Page
         'FlexiFormCheckboxSetField'
     );
 
-    public function populateDefaults()
-    {
-        return parent::populateDefaults();
+    public function canCreate($member = null) {
+        return (parent::canCreate($member) && Config::inst()->get('FlexiForm','can_create'));
+    }
+
+    public function canDelete($member = null) {
+        return (parent::canCreate($member) && Config::inst()->get('FlexiForm','can_delete'));
     }
 
     public function getCMSFields()

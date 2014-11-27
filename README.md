@@ -41,6 +41,21 @@ Basic Usage
 1. Add a "Flexi Form" Page to the SiteTree
 1. Save the page and configure fields via the __Form__ tab
 
+By default, Flexi Forms can be created and deleted by anyone with access to
+create or delete Pages. 
+
+You can disallow the creation and deletion of Flexi Forms through YAML 
+configuration, or by overloading the **canCreate** and **canDelete** methods of
+Custom Form classes.
+
+E.g. add the following to mysite/config/config.yml
+```
+---
+FlexiForm:
+  can_create: false
+  can_delete: false
+  
+```
 
 Custom Forms
 ------------
