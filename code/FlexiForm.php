@@ -184,33 +184,69 @@ class FlexiForm extends Page
         return $this->flexiform_tab = $tab_name;
     }
 
+    /**
+     * Get the FieldList for this form
+     *
+     * @return FieldList
+     */
     public function getFrontEndFlexiFormFields()
     {
-        $fields = new FieldList();
+        return new FieldList($this->FlexiFields()->toArray());
+    }
 
-        foreach ($this->FlexiFields() as $field) {
-            $fields->push($field);
+    /**
+     * Get a list of fields associated with this form that match type passed.
+     *
+     * @param string $flexi_type The class name of a FlexiFormField type
+     * @throws Exception if the type is not registered with this form
+     *
+     * @return ArrayList
+     */
+    public function getFlexiFieldsByType($flexi_type)
+    {
+        if (! in_array($flexi_type, $this->getAllowedFlexiTypes())) {
+            throw new Exception("The $flexi_type type is not allowed on this form");
         }
+        return new ArrayList(
+            $this->FlexiFields()
+                ->Filter('ClassName', $flexi_type)
+                ->toArray());
+    }
+
+    /**
+     * Get a list of fields associated with this form that match name passed.
+     *
+     * @param string $flexi_type The class name of a FlexiFormField type
+     *
+     * @return ArrayList
+     */
+    public function getFlexiFieldsByName($field_name)
+    {
+        return $this->FlexiFields()->Filter('Name', $field_name);
     }
 
     public function onAfterWrite()
     {
+        // if this is a newly created form, prepopulate fields
         if ($this->isChanged('ID')) {
-            // this is a newly created form, prepopulate fields
-
 
             $fields = $this->FlexiFields();
-            foreach ($this->getDefaultFlexiFields() as $flexi_field_definition) {
+            foreach ($this->getDefaultFlexiFields() as $field_type => $definition) {
 
-                if (is_string($flexi_field_definition)) {
+                if (is_string($definition)) {
 
+                    // lookup field name, prioritizing Readonly fields
                     if (! $field = FlexiFormField::get()->sort('Readonly', 'DESC')
-                        ->filter('FieldName', $flexi_field_definition)
+                        ->filter(
+                        array(
+                            'FieldName' => $definition,
+                            'ClassName' => $field_type
+                        ))
                         ->first()) {
-                        throw new ValidationException("No field found by name '$flexi_field_definition'");
+                        throw new ValidationException("No $field_type field found named `$definition`");
                     }
-                } elseif (is_array($flexi_field_definition)) {
-                    $field = FlexiFormUtil::CreateFlexiField($flexi_field_definition);
+                } elseif (is_array($definition)) {
+                    $field = FlexiFormUtil::CreateFlexiField($field_type, $definition);
                 } else {
                     throw new ValidationException('Unknown Field Definition Encountered');
                 }

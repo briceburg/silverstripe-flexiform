@@ -167,15 +167,14 @@ class MyForm extends FlexiForm {
  
 ### Automatically adding fields to a form
 
-Fields can be programatically defined and added to newly created forms. Because 
-FlexiForms features shared fields via many_many relationships, you can reuse a 
-field over and over. This all greatly reduces administrative repetitiveness and 
-improves consistency.
+Newly created forms can be programmatically initialized with fields. Fields
+can be created on-the-fly, or existing fields can be referenced and reused. This
+greatly reduces administrative repetitiveness and improves consistency.
 
-* Field definitions are defined in an _Array_
+* Field definitions are defined as _Arrays_
   * If the array value is a string, the field whose Name matches the value will be linked to the form.
   * If the value is an array, a field will be created from the array components.
-    * Name and Type are required. 
+    * Name is required. 
     * If supplying Options, use Value as array Key and Label as array Value .
   
 
@@ -184,20 +183,23 @@ improves consistency.
 ```php
 class AuthorChoiceForm extends FlexiForm {
 
- protected $default_flexi_fields = array(
-   'Email',   // will link the existing field with Name "Email"
-   array(     // creates a new field to spec
-     'Name' => 'Author',
-     'Type' => 'FlexiFormDropdownField',
-     'EmptyString' => 'Select your favorite Author',
-     'Options' => array(
-       'Balzac' => 'Honoré de Balzac',
-       'Dumas' => 'Alexandre Dumas',
-       'Flaubert' => 'Gustave Flaubert',
-       'Hugo' => 'Victor Hugo',
-       'Verne' => 'Jules Verne',
-       'Voltaire' => 'Voltaire')
-    )
+  protected $default_flexi_fields = array(
+      // link the existing FlexiFormEmailField with Name "Email"
+      'FlexiFormEmailField' => 'Email',
+
+      // create a new FlexiFormDropdownField to spec
+      'FlexiFormDropdownField' => array(
+          'Name' => 'Author',
+          'Type' => '',
+          'EmptyString' => 'Select your favorite Author',
+          'Options' => array(
+              'Balzac' => 'Honoré de Balzac',
+              'Dumas' => 'Alexandre Dumas',
+              'Flaubert' => 'Gustave Flaubert',
+              'Hugo' => 'Victor Hugo',
+              'Verne' => 'Jules Verne',
+              'Voltaire' => 'Voltaire')
+      )
   );
 
 }
@@ -215,16 +217,17 @@ class Event extends FlexiForm {
 
   public function getCMSFields()
   {
-    $this->setFlexiFormTab('Root.Registration');
-    $this->setDefaultFlexiFields(array(
-      'FirstName',
-      'LastName',
-      'Email'
-    ));
-    
-    $fields = parent::getCMSFields();
-    
-    return $fields;
+      $this->setFlexiFormTab('Root.Registration');
+      $this->setDefaultFlexiFields(
+          array(
+              'FlexiFormTextField' => 'FirstName',
+              'FlexiFormTextField' => 'LastName',
+              'FlexiFormEmailField' => 'Email'
+          ));
+      
+      $fields = parent::getCMSFields();
+      
+      return $fields;
   }
 
 }
@@ -237,40 +240,35 @@ Custom Fields
 New custom fields can be created by subclassing FlexiFormField types.
 * If your field has selectable options (like a Dropdown), extend the `FlexiFormOptionField` type.
 * If your field does not have selectable options (like an Email), extend the `FlexiFormField` type.
-* Alternatively, extend the existing type that best matches your behavior.
-
-See the existing [fieldtypes](https://github.com/briceburg/silverstripe-flexiforms/tree/master/code/fieldtypes) for examples.
-
-
+* Alternatively, extend the [existing type](https://github.com/briceburg/silverstripe-flexiforms/tree/master/code/fieldtypes) that best matches your behavior.
 
 
 TODO: frontend field documentation &c.
 
 ### Programmatically adding fields
 
-You can use the Environment Builder (/dev/build) to automatically create fields.
-**Any FlexiFormField with a valid $field_definition will be created**. If a
-field with the same name already exists, it will not be created.
-
-@TODO for normal fields - allow same name, but enforce unique per class?
+The Environment Builder (/dev/build) is used to automatically create fields.
+FlexiFormFields with valid $field_definitions will be created. Fields can 
+share the same name providing they're a different type.
 
 * First, create your Custom Field with a valid **$field_definition** property.
 ```php
 class FlexiAuthorField extends FlexiFormOptionField
 {
-    protected $field_definition = array(
-        'Name' => 'Author',
-        'Type' => 'FlexiFormDropdownField',
-        'EmptyString' => 'Select your favorite Author',
-        'Options' => array(
-            'Balzac' => 'Honoré de Balzac',
-            'Dumas' => 'Alexandre Dumas',
-            'Flaubert' => 'Gustave Flaubert',
-            'Hugo' => 'Victor Hugo',
-            'Verne' => 'Jules Verne',
-            'Voltaire' => 'Voltaire'
-        )
-    );
+  protected $field_definitions = array(
+    array(
+      'Name' => 'Author',
+      'EmptyString' => 'Select your favorite Author',
+      'Options' => array(
+        'Balzac' => 'Honoré de Balzac',
+        'Dumas' => 'Alexandre Dumas',
+        'Flaubert' => 'Gustave Flaubert',
+        'Hugo' => 'Victor Hugo',
+        'Verne' => 'Jules Verne',
+        'Voltaire' => 'Voltaire'
+      )
+    )
+  );
 
 }
 ```
@@ -280,7 +278,7 @@ class FlexiAuthorField extends FlexiFormOptionField
 ### Readonly fields
 
 By default, all fields are editable. The CMS administrator can change the base
-field name, the list of selectable options, etc. etc. This flexibility could be 
+field name, the list of selectable options, &c. This flexibility could be 
 unwanted in certain situations. 
 
 For instance, pretend you have a Custom Form that specifies a field named 
@@ -294,20 +292,15 @@ normal fields as follows;
 * **Readonly fields are marked with an asterix (*) when searched for**
 * **Readonly fields must be created programmatically**
 * **Readonly fields must have a unique FieldName**
-  * Normal fields can share names. For instance you could have a 
-`FlexiFormCheckboxField` named 'ShoeSize' as well as a `FlexiFormTextField` 
-also named 'ShoeSize'.
-
 
 ```php
 class FlexiAuthorField extends FlexiFormOptionField
 {
-    protected $field_definition = array(
-        'Name' => 'Author',
-        'Readonly' => true, // locks field as readonly, ensures Name is unique
-        ...
-    );
-
+  protected $field_definitions = array(
+    array(
+      'Name' => 'Author',
+      'Readonly' => true,
+      ...
 }
 ```
 

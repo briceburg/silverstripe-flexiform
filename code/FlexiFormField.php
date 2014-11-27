@@ -10,7 +10,7 @@ class FlexiFormField extends DataObject
     protected $field_description = 'Override Me';
 
     // used to automatically generate fields during /dev/build
-    protected $field_definition = null;
+    protected $field_definitions = array();
 
     private static $db = array(
         'FieldName' => 'Varchar(16)',
@@ -127,38 +127,49 @@ class FlexiFormField extends DataObject
         return (empty($value)) ? $this->FieldName : $value;
     }
 
-    public function getFlexiFieldDefinition()
+    public function getFlexiFieldDefinitions()
     {
-        return $this->field_definition;
+        return $this->field_definitions;
     }
 
-    public function setFlexiFieldDefinition(Array $flexi_field_definition)
+    public function setFlexiFieldDefinitions(Array $flexi_field_definitions)
     {
-        return $this->field_definition = $flexi_field_definition;
+        return $this->field_definitions = $flexi_field_definitions;
     }
 
     public function requireDefaultRecords()
     {
         // if this field has a definition, attempt to create it
-        $definition = $this->getFlexiFieldDefinition();
+        $definitions = $this->getFlexiFieldDefinitions();
 
-        if ($definition !== null) {
+        foreach($this->getFlexiFieldDefinitions() as $definition) {
+
+            $field_type = $this->ClassName;
+
+            $readonly = (isset($definition['Readonly']) && $definition['Readonly']);
 
             $filter = array(
                 'FieldName' => $definition['Name'],
-                'Readonly' => (isset($definition['Readonly']) && $definition['Readonly'])
+                'Readonly' => $readonly
             );
+
+            // allow same names on non readonly fields if they're different classes
+            if(!$readonly) {
+                $filter['ClassName'] = $field_type;
+            }
 
             // only create field if it's name doesn't yet exist
             if (! FlexiFormField::get()->filter($filter)->first()) {
 
-                if ($field = FlexiFormUtil::CreateFlexiField($definition)) {
-                    $readonly = ($field->Readonly) ? 'Readonly' : 'Normal';
+                if ($field = FlexiFormUtil::CreateFlexiField($field_type, $definition)) {
+                    $prefix = ($field->Readonly) ? 'Readonly' : 'Normal';
                     DB::alteration_message(
-                        "flexiforms - Created $readonly $this->className} named `{$field->FieldName}`.",
-                        "created");
+                    "flexiforms - Created $prefix $field_type named `{$field->FieldName}`.",
+                    "created");
                 }
             }
+
+
         }
 
         return parent::requireDefaultRecords();

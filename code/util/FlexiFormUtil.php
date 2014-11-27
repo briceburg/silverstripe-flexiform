@@ -17,11 +17,7 @@ class FlexiFormUtil
         Requirements::css($moduleDir . '/css/flexiforms.css');
     }
 
-    public static function CreateFlexiField($definition){
-
-        if(!isset($definition['Type']) || empty($definition['Type'])) {
-            throw new ValidationException('Flexi Field definitions must specify a Type');
-        }
+    public static function CreateFlexiField($field_type, $definition){
 
         if(!isset($definition['Name']) || empty($definition['Name'])) {
             throw new ValidationException('Flexi Field definitions must specify a Name');
@@ -31,15 +27,15 @@ class FlexiFormUtil
             throw new ValidationException('Options must be an Array in Flexi Field definitions');
         }
 
-        if(!class_exists($definition['Type'])) {
-            throw new ValidationException($definition['Type'] . ' is an unknown FlexiFormField Type');
+        if(!class_exists($field_type)) {
+            throw new ValidationException($field_type . ' is an unknown FlexiFormField Type');
         }
 
-        if(isset($definition['Options']) && !singleton($definition['Type'])->is_a('FlexiFormOptionField')) {
-            throw new ValidationException($definition['Type'] . ' must subclass FlexiFormOptionField to contain options');
+        if(isset($definition['Options']) && !singleton($field_type)->is_a('FlexiFormOptionField')) {
+            throw new ValidationException($field_type . ' must subclass FlexiFormOptionField to contain options');
         }
 
-        $field = new $definition['Type']();
+        $field = new $field_type();
         $field->FieldName = $definition['Name'];
 
         if(isset($definition['DefaultValue'])) {
