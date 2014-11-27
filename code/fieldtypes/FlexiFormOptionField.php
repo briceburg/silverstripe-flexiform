@@ -7,11 +7,17 @@ class FlexiFormOptionField extends FlexiFormField
     {
         $fields = parent::getCMSFields();
 
-        $fields->replaceField('FieldDefaultValue', $this->getDefaultValueFormField());
+        if ($this->Readonly) {
+            $fields->addFieldsToTab('Root.Main',
+                new ReadonlyField('ReadonlyOptions', 'Options', $this->OptionsPreview(999)));
+        } else {
 
-        $config = new GridFieldConfig_FlexiFormOption();
+            $fields->replaceField('FieldDefaultValue', $this->getDefaultValueFormField());
 
-        $fields->addFieldToTab('Root.Main', new GridField('Options', 'Options', $this->Options(), $config));
+            $config = new GridFieldConfig_FlexiFormOption();
+
+            $fields->addFieldToTab('Root.Main', new GridField('Options', 'Options', $this->Options(), $config));
+        }
 
         return $fields;
     }
@@ -36,17 +42,19 @@ class FlexiFormOptionField extends FlexiFormField
         return $result;
     }
 
-    public function OptionsPreview()
+    public function OptionsPreview($limit = 24)
     {
         $field = DBField::create_field('Text', implode(', ', $this->Options()->column('Value')));
-        return $field->LimitCharacters(24);
+        return $field->LimitCharacters($limit);
     }
 
     public function getDefaultValueFormField($field_name = 'FieldDefaultValue')
     {
         $field = new DropdownField($field_name, 'Default Value', array());
-        if($this->Options()->exists()) {
-            $field->setSource($this->Options()->map('Value','Value')->toArray());
+        if ($this->Options()->exists()) {
+            $field->setSource($this->Options()
+                ->map('Value', 'Value')
+                ->toArray());
         }
         $field->setEmptyString('None (Displays Empty String)');
 

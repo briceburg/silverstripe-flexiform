@@ -44,6 +44,7 @@ class FlexiFormField extends DataObject
 
         $fields->removeByName('Options');
         $fields->removeByName('FlexiForms');
+        $fields->removeByName('Readonly');
 
         $field = $fields->dataFieldByName('FieldName');
         $field->setTitle('Name');
@@ -57,6 +58,10 @@ class FlexiFormField extends DataObject
         $field = new LiteralField('Description',
             "<strong>{$this->field_label} Field &mdash;</strong> {$this->field_description} <hr />");
         $fields->addFieldToTab('Root.Main', $field, 'FieldName');
+
+        if($this->Readonly) {
+            $fields = $fields->transform(new ReadonlyTransformation());
+        }
 
         return $fields;
     }
@@ -104,8 +109,8 @@ class FlexiFormField extends DataObject
 
     public function getTitle()
     {
-        $system = ($this->SystemField) ? '*' : '';
-        return "{$this->FieldName} ({$this->field_label})$system";
+        $readonly = ($this->Readonly) ? '*' : '';
+        return "{$this->FieldName} ({$this->field_label})$readonly";
     }
 
     public function getDefaultValue()
