@@ -69,12 +69,14 @@ class FlexiForm extends Page
         'FlexiFormCheckboxSetField'
     );
 
-    public function canCreate($member = null) {
-        return (parent::canCreate($member) && Config::inst()->get('FlexiForm','can_create'));
+    public function canCreate($member = null)
+    {
+        return (parent::canCreate($member) && Config::inst()->get('FlexiForm', 'can_create'));
     }
 
-    public function canDelete($member = null) {
-        return (parent::canCreate($member) && Config::inst()->get('FlexiForm','can_delete'));
+    public function canDelete($member = null)
+    {
+        return (parent::canCreate($member) && Config::inst()->get('FlexiForm', 'can_delete'));
     }
 
     public function getCMSFields()
@@ -172,7 +174,6 @@ class FlexiForm extends Page
         return $this->default_flexi_fields = $flexi_field_definitions;
     }
 
-
     public function getFlexiFormTab()
     {
         return $this->flexiform_tab;
@@ -182,7 +183,6 @@ class FlexiForm extends Page
     {
         return $this->flexiform_tab = $tab_name;
     }
-
 
     public function getFrontEndFlexiFormFields()
     {
@@ -204,7 +204,9 @@ class FlexiForm extends Page
 
                 if (is_string($flexi_field_definition)) {
 
-                    if (! $field = FlexiFormField::get()->filter('FieldName', $flexi_field_definition)->first()) {
+                    if (! $field = FlexiFormField::get()->sort('Readonly', 'DESC')
+                        ->filter('FieldName', $flexi_field_definition)
+                        ->first()) {
                         throw new ValidationException("No field found by name '$flexi_field_definition'");
                     }
                 } elseif (is_array($flexi_field_definition)) {
