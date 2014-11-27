@@ -139,7 +139,7 @@ class MyForm extends FlexiForm {
 Disallow the creation and deletion of Flexi Forms through YAML 
 configuration. E.g. add the following to mysite/config/config.yml
 
-```
+```yaml
 ---
 FlexiForm:
   can_create: false
@@ -273,6 +273,23 @@ class FlexiAuthorField extends FlexiFormOptionField
 }
 ```
 * Second, execute the Environment Builder (e.g. by visiting /dev/build)
+
+Alternatively, you can create fields through YAML configurations. This is 
+especially useful for creating fields from built-in field types. E.g. add the 
+following to mysite/config/config.yml
+
+```yaml
+---
+
+FlexiFormTextField:
+  field_definitions: 
+    - { Name: FirstName }
+    - { Name: LastName }
+    
+FlexiFormDropdownField:
+  field_definitions:
+    - { Name: Preference, Options: { Eastern: Abacus, Western: Calculator } }
+``` 
 
 
 ### Readonly fields
