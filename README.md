@@ -28,27 +28,21 @@ Requirements
 
 The venerable GridFieldExtensions https://github.com/ajshort/silverstripe-gridfieldextensions
 
+Tested in SilverStripe 3.1
+
 Usage 
 =====
 
-`FlexiForm` - Extends the _Page_ class. 
-
-`FlexiFormField` - Base class all FlexiFormField types extend from.
-
-Basic Usage
------------
+By default, Flexi Forms can be created and deleted by anyone with access to
+create or delete Pages.
 
 1. Add a "Flexi Form" Page to the SiteTree
-1. Save the page and configure fields via the __Form__ tab
+1. Visit page in CMS and configure configure accordingly. 
 
-By default, Flexi Forms can be created and deleted by anyone with access to
-create or delete Pages. 
-
+Behavior is further tailored through subclassing and [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration)
 
 Custom Forms
 ------------
-
-The behavior of a `FlexiForm` is customized through subclasses. 
 
 * Create a Custom Form by extending `FlexiForm`
 * Flush the cache to register it in your manifest.
@@ -68,7 +62,7 @@ behavioral needs.
 
 ### Limiting Field Types
 
-The choice of fields can be limited on a per form basis. Here's a couple examples. 
+The choice of fields types can be defined per form. Here's a couple examples. 
 
 * Strategy 1: Overload **$allowed_flexi_types** in your custom form
 
@@ -101,25 +95,27 @@ class MyForm extends FlexiForm {
 
 ### Changing the Tab FlexiForm appears in
 
-The tab a FlexiForm appears in is controlled by  the **$flexiform_tab** property 
-by default. It is manipulated with the **setFlexiFormTab**, and retreived via
-**getFlexiFormTab**.
+The CMS tab(s) flexiform uses are defined in [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration).
+By default, flexiform will add a Form to "Root.Main". You can change it a couple of ways;
 
 
-* Strategy 1: Overload **$flexiform_tab** in your custom form
+* Strategy 1: Override via mysite/config/config.yml
 
-```php
-class MyForm extends FlexiForm {
-
-  protected $flexiform_tab = 'Root.Main';
-
-}
+```yaml
+---
+# Override FlexiForm defaults
+FlexiForm:
+  form_tab: Root.FlexiForm
+  
+# Expclitly set for a custom Form (RegistrationForm) that extends FlexiForm
+RegistrationForm:
+  form_tab: Root.Registration
 ```
 
-* Strategy 2: Set via  **setFlexiFormTab** 
+* Strategy 2: Overload via  **setFlexiFormTab** 
 
 ```php
-class MyForm extends FlexiForm {
+class RegistrationForm extends FlexiForm {
 
   public function getCMSFields()
   {
@@ -131,7 +127,6 @@ class MyForm extends FlexiForm {
   }
 
 }
-```
 
 ### Allow only your Custom Form to be created
 
@@ -168,7 +163,7 @@ class MyForm extends FlexiForm {
 ### Automatically adding fields to a form
 
 Newly created forms can be programmatically initialized with fields. Fields
-can be created on-the-fly, or existing fields can be referenced and reused. This
+are created on-the-fly, or existing fields can be referenced and reused. This
 greatly reduces administrative repetitiveness and improves consistency.
 
 * Field definitions are defined as _Arrays_

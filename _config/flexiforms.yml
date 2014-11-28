@@ -4,3 +4,5 @@ name: flexiforms
 FlexiForm:
   can_create: true
   can_delete: true
+  
+  form_tab: Root.Form

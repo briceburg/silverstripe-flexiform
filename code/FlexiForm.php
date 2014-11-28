@@ -3,43 +3,6 @@
 class FlexiForm extends Page
 {
 
-    protected $flexiform_tab = 'Root.Form';
-
-    /**
-     * An array of fields to prepopulate this newly created form with.
-     *
-     * If the value is a string, the field whose Name matches the value will
-     * be linked to the form. This combines well with _System Fields_, as their
-     * name cannot change.
-     *
-     * If the value is an array, a field will be created from the components
-     * of the array. Name and Type are required. If supplying Options,
-     * use Value as array Key and Label as array Value .
-     *
-     * e.g.
-     *
-
-     protected $default_flexi_fields = array(
-        'Email',   // will link the existing field with Name "Email"
-        array(     // creates a new field to spec
-            'Name' => 'Author',
-            'Type' => 'FlexiFormDropdownField',
-            'EmptyString' => 'Select your favorite Author',
-            'Options' => array(
-                'Balzac' => 'Honoré de Balzac',
-                'Dumas' => 'Alexandre Dumas',
-                'Flaubert' => 'Gustave Flaubert',
-                'Hugo' => 'Victor Hugo',
-                'Verne' => 'Jules Verne',
-                'Voltaire' => 'Voltaire')
-        )
-     );
-
-     *
-     * @var Array $flexi_field_definitions
-     */
-    protected $default_flexi_fields = array();
-
     private static $db = array();
 
     private static $has_many = array(
@@ -60,6 +23,11 @@ class FlexiForm extends Page
         )
     );
 
+    /**
+     * An array of allowed FlexiFormField Types for this form.
+     *
+     * @var Array
+     */
     protected $allowed_flexi_types = array(
         'FlexiFormTextField',
         'FlexiFormEmailField',
@@ -68,6 +36,14 @@ class FlexiForm extends Page
         'FlexiFormRadioField',
         'FlexiFormCheckboxSetField'
     );
+
+    /**
+     * An array of field definitions that are automatically added to this
+     * form when it is first created. See documentation for field definitions.
+     *
+     * @var Array
+     */
+    protected $default_flexi_fields = array();
 
     public function canCreate($member = null)
     {
@@ -176,12 +152,12 @@ class FlexiForm extends Page
 
     public function getFlexiFormTab()
     {
-        return $this->flexiform_tab;
+        return $this->stat('form_tab');
     }
 
     public function setFlexiFormTab($tab_name)
     {
-        return $this->flexiform_tab = $tab_name;
+        return $this->set_stat('form_tab');
     }
 
     /**
