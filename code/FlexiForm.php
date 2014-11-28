@@ -47,12 +47,12 @@ class FlexiForm extends Page
 
     public function canCreate($member = null)
     {
-        return (parent::canCreate($member) && Config::inst()->get('FlexiForm', 'can_create'));
+        return (singleton('Page')->canCreate($member) && $this->stat('can_create'));
     }
 
     public function canDelete($member = null)
     {
-        return (parent::canCreate($member) && Config::inst()->get('FlexiForm', 'can_delete'));
+        return (singleton('Page')->canDelete($member) && $this->stat('can_delete'));
     }
 
     public function getCMSFields()

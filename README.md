@@ -39,25 +39,25 @@ create or delete Pages.
 1. Add a "Flexi Form" Page to the SiteTree
 1. Visit page in CMS and configure configure accordingly. 
 
-Behavior is further tailored through subclassing and [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration)
+Most usage is accomplished through the CMS -- however you can further tailor
+behavior through subclassing (protected properties, getters, and setters)
+and [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration).
+
+For instance, A form's allowed field types are retrieved by the
+ **getAllowedFlexiTypes** method of the `FlexiForm` class. This method returns 
+ the protected **$allowed_flexi_types** property, which 
+can be manipulated with **setAllowedFlexiTypes**, and fetched with
+**getAllowedFlexiTypes**.
+
+This approach allots flexibility and enables different strategies to accomplish 
+behavioral needs.
+
 
 Custom Forms
 ------------
 
 * Create a Custom Form by extending `FlexiForm`
 * Flush the cache to register it in your manifest.
-
-Default behavior is controlled by visible protected properties, and 
-manipulated with getters and setters. 
-
-For instance, A form's allowed field types 
-are retrieved by the **getAllowedFlexiTypes** method of the `FlexiForm` class. 
-This method returns the protected **$allowed_flexi_types** property, which 
-can be manipulated with **setAllowedFlexiTypes**, and fetched with
-**addAllowedFlexiType**.
-
-This approach allots flexibility and enables different strategies to accomplish 
-behavioral needs.
 
 
 ### Limiting Field Types
@@ -127,11 +127,12 @@ class RegistrationForm extends FlexiForm {
   }
 
 }
+```
 
 ### Allow only your Custom Form to be created
 
 
-Disallow the creation and deletion of Flexi Forms through YAML 
+Creation and deletion of Flexi Forms can be handled through [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration).
 configuration. E.g. add the following to mysite/config/config.yml
 
 ```yaml
@@ -140,24 +141,20 @@ FlexiForm:
   can_create: false
   can_delete: false
   
+MyForm:
+  can_create: true
+  can_delete: true
 ```
 
-Then, in your Custom Form class, override the **canCreate** and **canDelete**
-methods.
+Alternatively, use the SilverStripe's `$hide_ancestor` property to prevent
+Flexi Forms from appearinng when adding pages. (And of course you can always
+overload the canCreate/canDelete methods).
+
 
 ```php
 class MyForm extends FlexiForm {
-
-  public function canCreate($member = null) {
-    return singleton('Page')->canCreate($member);
-  }
-
-  public function canDelete($member = null) {
-    return singleton('Page')->canDelete($member);
-  }
-
+  private static $hide_ancestor = 'FlexiForm';
 }
-
 ```
  
 ### Automatically adding fields to a form
