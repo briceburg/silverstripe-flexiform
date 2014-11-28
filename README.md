@@ -163,11 +163,11 @@ Newly created forms can be programmatically initialized with fields. Fields
 are created on-the-fly, or existing fields can be referenced and reused. This
 greatly reduces administrative repetitiveness and improves consistency.
 
-* Field definitions are defined as _Arrays_
-  * If the array value is a string, the field whose Name matches the value will be linked to the form.
+* Field definitions are defined as map of _Arrays_, with the key representing Field Type.
+  * If the value is a string, the field with mating Name and Type will be reused.  
   * If the value is an array, a field will be created from the array components.
     * Name is required. 
-    * If supplying Options, use Value as array Key and Label as array Value .
+    * If supplying Options, use Value => Label.
   
 
 * Strategy 1: Overload **$default_flexi_fields** in your custom form
@@ -229,7 +229,7 @@ class Event extends FlexiForm {
 Custom Fields
 -------------
 
-New custom fields can be created by subclassing FlexiFormField types.
+New custom fields can be created by subclassing `FlexiFormField` types.
 * If your field has selectable options (like a Dropdown), extend the `FlexiFormOptionField` type.
 * If your field does not have selectable options (like an Email), extend the `FlexiFormField` type.
 * Alternatively, extend the [existing type](https://github.com/briceburg/silverstripe-flexiforms/tree/master/code/fieldtypes) that best matches your behavior.
@@ -243,7 +243,7 @@ The Environment Builder (/dev/build) is used to automatically create fields.
 FlexiFormFields with valid $field_definitions will be created. Fields can 
 share the same name providing they're a different type.
 
-* First, create your Custom Field with a valid **$field_definition** property.
+First, create your Custom Field with a valid **$field_definition** property.
 ```php
 class FlexiAuthorField extends FlexiFormOptionField
 {
@@ -264,15 +264,14 @@ class FlexiAuthorField extends FlexiFormOptionField
 
 }
 ```
-* Second, execute the Environment Builder (e.g. by visiting /dev/build)
+Second, trigger the Environment Builder (e.g. by visiting /dev/build)
 
-Alternatively, you can create fields through YAML configurations. This is 
-especially useful for creating fields from built-in field types. E.g. add the 
+Alternatively, you can create fields through [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration).
+This is especially useful for creating fields from built-in field types. E.g. add the 
 following to mysite/config/config.yml
 
 ```yaml
 ---
-
 FlexiFormTextField:
   field_definitions: 
     - { Name: FirstName }
@@ -286,21 +285,21 @@ FlexiFormDropdownField:
 
 ### Readonly fields
 
-By default, all fields are editable. The CMS administrator can change the base
-field name, the list of selectable options, &c. This flexibility could be 
+By default, all fields are editable. The CMS administrator can change the 
+FieldName, list of selectable options, &c. This flexibility may be 
 unwanted in certain situations. 
 
-For instance, pretend you have a Custom Form that specifies a field named 
+For instance, pretend you have a Custom Form that references a field named 
 'Email' in  _$default_flexi_fields_. Soon after, the admin renamed the 'Email' 
 field to 'WorkEmail'. Now, whenever the Custom Form is created, a Validation 
-Exception will occur complainging that the 'Email' field is not found. 
+Exception will occur complaining that 'Email' is not found. 
 
-Readonly fields are a great way to protect against this. They are different from
+Readonly fields are a great way to protect against this. They differ from
 normal fields as follows;
 * **Readonly fields have their FieldName, FieldDefaultValue, and Options locked**
 * **Readonly fields are marked with an asterix (*) when searched for**
 * **Readonly fields must be created programmatically**
-* **Readonly fields must have a unique FieldName**
+* **Readonly field names must be unique, regardless of underlying field type**
 
 ```php
 class FlexiAuthorField extends FlexiFormOptionField
@@ -313,3 +312,11 @@ class FlexiAuthorField extends FlexiFormOptionField
 }
 ```
 
+or
+
+```yaml
+---
+FlexiAuthorField:
+  field_definitions: 
+    - { Name: Author, ReadOnly: true }
+```
