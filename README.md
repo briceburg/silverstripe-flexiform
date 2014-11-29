@@ -1,7 +1,7 @@
 silverstripe-flexiforms
 =======================
 
-Add configurable forms to your pages. Features intuitive GridField based management of fields and submissions through the CMS.
+Add CMS configurable forms to your SilverStripe objects. 
 
 **Work in progress. Pre-Release. Field Management is pretty much in place, need to finish
 submission handling and frontend work.**
@@ -9,18 +9,15 @@ submission handling and frontend work.**
 Features
 --------
 
-* GridField management of fields, field options, and submissions.
-* Extensible Field Types (`FlexiFormField`)
-  * Text, Email, Select, Checkbox, Radio, and Checkbox Set field types out-of-box.
-  * Easily create new FlexiFormField types
-* Extensible Forms (`FlexiForm`)
+* Add forms to DataObjects and Pages
+* GridField based management of fields, options, submissions, actions, &c.
+  * 100% compatible with [holder pages](https://github.com/briceburg/silverstripe-holderpage) & VersionedGridfield
+* Extensible Field Types (`FlexiFormField`) and Forms (`FlexiForm`)
   * Programmatically define initial fields added to newly created forms
   * Limit allowed field types per form
-* **Many-many** relationship between Forms and Fields
-  * Reduces administrative repetitiveness and improves consistency. 
-  * Settings are stored as _many_many_extraFields_, allowing per-form customization without disturbing other forms using the same field.
-* Automatically create fields in the Environment Builder (during /dev/build)  
-* Compatible with  [holder pages](https://github.com/briceburg/silverstripe-holderpage) + VersionedGridfield
+* **Many-many** relationship between Forms and Fields - reduces administrative repetitiveness and improves consistency
+  * Leverages _many_many_extraFields_ to allow per-form customization without disturbing other forms using the same field
+* Programatically create fields in the Environment Builder (during /dev/build)  
  
 
 Requirements
@@ -33,43 +30,66 @@ Tested in SilverStripe 3.1
 Usage 
 =====
 
-By default, Flexi Forms can be created and deleted by anyone with access to
-create or delete Pages.
+Add configurable forms to your DataObjects and Pages by extending them with the
+`FlexiFormExtension` DataExtension.  E.g.
 
-1. Add a "Flexi Form" Page to the SiteTree
-1. Visit page in CMS and configure configure accordingly. 
+```php
+class Event extends DataObject
+{
 
-Most usage is accomplished through the CMS -- however you can further tailor
-behavior through subclassing (protected properties, getters, and setters)
+    private static $extensions = array(
+        'FlexiFormExtension'
+    );
+
+}
+```
+Trigger the environment builder (/dev/build) after extending objects --
+You will now see the Form tab when editing Event in the CMS.
+
+To display forms on the Front-End, update your templates. Here's an example
+Event.ss
+
+```html
+
+Coming Soon...
+
+```
+
+You may, as always, override the [built-in templates](https://github.com/briceburg/silverstripe-flexiaddress/tree/master/templates) by
+adding them to your theme and changing markup as needed.
+
+
+
+Configuration
+=============
+
+Most configuration is accomplished through the CMS -- however you can further 
+tailor behavior through subclassing (protected properties, getters, and setters)
 and [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration).
 
 For instance, A form's allowed field types are retrieved by the
- **getAllowedFlexiTypes** method of the `FlexiForm` class. This method returns 
- the protected **$allowed_flexi_types** property, which 
-can be manipulated with **setAllowedFlexiTypes**, and fetched with
-**getAllowedFlexiTypes**.
+ **getFlexiFormFieldTypes** method of the `FlexiFormExtension` class. This method returns 
+ the protected **$flexiform_field_types** property, which 
+can be manipulated with **setFlexiFormFieldTypes** and **addFlexiFormFieldType** methods. 
 
 This approach allots flexibility and enables different strategies to accomplish 
 behavioral needs.
-
-
-Custom Forms
-------------
-
-* Create a Custom Form by extending `FlexiForm`
-* Flush the cache to register it in your manifest.
 
 
 ### Limiting Field Types
 
 The choice of fields types can be defined per form. Here's a couple examples. 
 
-* Strategy 1: Overload **$allowed_flexi_types** in your custom form
+* Strategy 1: Overload **$flexiform_field_types** in your custom form
 
 ```php
-class MyForm extends FlexiForm {
+class FormPage extends Page {
 
-  protected $allowed_flexi_types = array(
+  private static $extensions = array(
+    'FlexiFormExtension'
+  );
+    
+  private static $flexiform_field_types = array(
     'FlexiFormTextField',
     'FlexiFormDropdownField'
   );
@@ -77,14 +97,19 @@ class MyForm extends FlexiForm {
 }
 ```
 
-* Strategy 2: Append a custom type via **addAllowedFlexiType**
+* Strategy 2: Append a custom type via **addFlexiFormFieldType**
 
 ```php
-class MyForm extends FlexiForm {
+class FormPage extends Page {
+
+  private static $extensions = array(
+    'FlexiFormExtension'
+  );
 
   public function getCMSFields()
   {
-    $this->addAllowedFlexiType('MyCustomFlexiFormField');
+    // make configuration changes _BEFORE_ calling parent getCMSFields...
+    $this->addFlexiFormFieldType('MyCustomFlexiFormField');
     
     $fields = parent::getCMSFields();
     
@@ -95,27 +120,42 @@ class MyForm extends FlexiForm {
 
 ### Changing the Tab FlexiForm appears in
 
-The CMS tab(s) flexiform uses are defined in [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration).
-By default, flexiform will add a Form to "Root.Main". You can change it a couple of ways;
+By default, flexiform will add a Form to "Root.Form". You can change it a couple of ways;
 
-
-* Strategy 1: Override via mysite/config/config.yml
+* Strategy 1: Using [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration)
 
 ```yaml
 ---
-# Override FlexiForm defaults
-FlexiForm:
-  form_tab: Root.FlexiForm
+
+# Global Change
+FlexiFormExtension:
+  flexiform_tab: Root.Addresses
   
-# Expclitly set for a custom Form (RegistrationForm) that extends FlexiForm
-RegistrationForm:
-  form_tab: Root.Registration
+# Class Specific
+FormPage:
+  flexiform_tab: Root.Main
+  flexiform_insertBefore: Metadata
 ```
 
-* Strategy 2: Overload via  **setFlexiFormTab** 
+* Strategy 2: Overload the **setFlexiFormTab** property
 
 ```php
-class RegistrationForm extends FlexiForm {
+class FormPage extends Page {
+
+  private static $extensions = array(
+    'FlexiFormExtension'
+  );
+  
+  private static $flexiform_tab = 'Root.Main';
+  private static $flexiform_insertBefore = 'Metadata';
+
+}
+```
+
+* Strategy 3: Set via  **setFlexiFormTab** 
+
+```php
+class RegistrationForm extends DataObject {
 
   public function getCMSFields()
   {
@@ -126,34 +166,6 @@ class RegistrationForm extends FlexiForm {
     return $fields;
   }
 
-}
-```
-
-### Allow only your Custom Form to be created
-
-
-Creation and deletion of Flexi Forms can be handled through [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration).
-configuration. E.g. add the following to mysite/config/config.yml
-
-```yaml
----
-FlexiForm:
-  can_create: false
-  can_delete: false
-  
-MyForm:
-  can_create: true
-  can_delete: true
-```
-
-Alternatively, use the SilverStripe's `$hide_ancestor` property to prevent
-Flexi Forms from appearinng when adding pages. (And of course you can always
-overload the canCreate/canDelete methods).
-
-
-```php
-class MyForm extends FlexiForm {
-  private static $hide_ancestor = 'FlexiForm';
 }
 ```
  
@@ -170,12 +182,16 @@ greatly reduces administrative repetitiveness and improves consistency.
     * If supplying Options, use Value => Label.
   
 
-* Strategy 1: Overload **$default_flexi_fields** in your custom form
+* Strategy 1: Overload **$flexiform_initial_fields** in your custom form
 
 ```php
-class AuthorChoiceForm extends FlexiForm {
+class AuthorChoiceForm extends DataObject {
 
-  protected $default_flexi_fields = array(
+  private static $extensions = array(
+      'FlexiFormExtension'
+  );
+
+  private static $flexiform_initial_fields = array(
       // link the existing FlexiFormEmailField with Name "Email"
       'FlexiFormEmailField' => 'Email',
 
@@ -205,12 +221,17 @@ already exist. Perhaps by manually being created or better yet - created
 as a Readonly fields during /dev/build_
 
 ```php
-class Event extends FlexiForm {
+class Event extends SiteTree {
 
+  private static $extensions = array(
+      'FlexiFormExtension'
+  );
+  
   public function getCMSFields()
   {
+      // make configuration changes _BEFORE_ calling parent getCMSFields...
       $this->setFlexiFormTab('Root.Registration');
-      $this->setDefaultFlexiFields(
+      $this->setFlexiFormInitialFields(
           array(
               'FlexiFormTextField' => 'FirstName',
               'FlexiFormTextField' => 'LastName',
