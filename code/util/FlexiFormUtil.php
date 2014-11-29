@@ -14,7 +14,7 @@ class FlexiFormUtil
     public static function include_requirements()
     {
         $moduleDir = self::get_module_dir();
-        Requirements::css($moduleDir . '/css/flexiforms.css');
+        Requirements::css($moduleDir . '/css/flexiform.css');
     }
 
     public static function CreateFlexiField($field_type, $definition){
@@ -87,7 +87,7 @@ class FlexiFormUtil
             if ($field = FlexiFormUtil::CreateFlexiField($field_type, $definition)) {
                 $prefix = ($field->Readonly) ? 'Readonly' : 'Normal';
                 DB::alteration_message(
-                "flexiforms - Created $prefix $field_type named `{$field->FieldName}`.",
+                "flexiform - Created $prefix $field_type named `{$field->FieldName}`.",
                 "created");
             }
         }
