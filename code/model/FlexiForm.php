@@ -157,7 +157,7 @@ class FlexiForm extends Page
 
     public function setFlexiFormTab($tab_name)
     {
-        return $this->set_stat('form_tab');
+        return $this->set_stat($tab_name);
     }
 
     /**

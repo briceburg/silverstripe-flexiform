@@ -318,5 +318,5 @@ or
 ---
 FlexiAuthorField:
   field_definitions: 
-    - { Name: Author, ReadOnly: true }
+    - { Name: Author, Readonly: true }
 ```
