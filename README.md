@@ -9,14 +9,14 @@ submission handling and frontend work.**
 Features
 --------
 
-* Add forms to DataObjects and Pages
+* Add forms to DataObjects or Pages
 * GridField based management of fields, options, submissions, actions, &c.
   * 100% compatible with [holder pages](https://github.com/briceburg/silverstripe-holderpage) & VersionedGridfield
 * Extensible Field Types (`FlexiFormField`) and Forms (`FlexiForm`)
   * Programmatically define initial fields added to newly created forms
   * Limit allowed field types per form
-* **Many-many** relationship between Forms and Fields - reduces administrative repetitiveness and improves consistency
-  * Leverages _many_many_extraFields_ to allow per-form customization without disturbing other forms using the same field
+* **Many-many** relation between Form and Fields - reduced repetitiveness and improved consistency
+  * _many_many_extraFields_ allows per-form customization without disturbing other forms using the same field
 * Programatically create fields in the Environment Builder (during /dev/build)  
  
 
@@ -80,7 +80,18 @@ behavioral needs.
 
 The choice of fields types can be defined per form. Here's a couple examples. 
 
-* Strategy 1: Overload **$flexiform_field_types** in your custom form
+
+* Strategy 1: Using [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration)
+
+```yaml
+---
+FormPage:
+  flexiform_field_types:
+    - FlexiFormTextField
+    - FlexiFormDropdownField
+```
+
+* Strategy 2: Overload  the **$flexiform_field_types** property
 
 ```php
 class FormPage extends Page {
@@ -97,7 +108,7 @@ class FormPage extends Page {
 }
 ```
 
-* Strategy 2: Append a custom type via **addFlexiFormFieldType**
+* Strategy 3: Append a custom type via **addFlexiFormFieldType**
 
 ```php
 class FormPage extends Page {
@@ -152,7 +163,7 @@ class FormPage extends Page {
 }
 ```
 
-* Strategy 3: Set via  **setFlexiFormTab** 
+* Strategy 3: Use the **setFlexiFormTab** setter method 
 
 ```php
 class RegistrationForm extends DataObject {
@@ -180,9 +191,8 @@ greatly reduces administrative repetitiveness and improves consistency.
   * If the value is an array, a field will be created from the array components.
     * Name is required. 
     * If supplying Options, use Value => Label.
-  
 
-* Strategy 1: Overload **$flexiform_initial_fields** in your custom form
+* Strategy 1: Overload the **$flexiform_initial_fields** property
 
 ```php
 class AuthorChoiceForm extends DataObject {
@@ -213,7 +223,7 @@ class AuthorChoiceForm extends DataObject {
 }
 ```
 
-* Strategy 2: Set via  **setDefaultFlexiFields** 
+* Strategy 2: Use the **setDefaultFlexiFields** setter method 
 
 
 _This example assumes that fields named FirstName, LastName, and Email 
@@ -253,7 +263,7 @@ Custom Fields
 New custom fields can be created by subclassing `FlexiFormField` types.
 * If your field has selectable options (like a Dropdown), extend the `FlexiFormOptionField` type.
 * If your field does not have selectable options (like an Email), extend the `FlexiFormField` type.
-* Alternatively, extend the [existing type](https://github.com/briceburg/silverstripe-flexiforms/tree/master/code/fieldtypes) that best matches your behavior.
+* Alternatively, extend the [existing type](https://github.com/briceburg/silverstripe-flexiforms/tree/master/code/model/fieldtypes) that best matches your behavior.
 
 
 TODO: frontend field documentation &c.
@@ -288,7 +298,7 @@ class FlexiAuthorField extends FlexiFormOptionField
 Second, trigger the Environment Builder (e.g. by visiting /dev/build)
 
 Alternatively, you can create fields through [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration).
-This is especially useful for creating fields from built-in field types. E.g. add the 
+**This is especially useful for creating fields from built-in field types**. E.g. add the 
 following to mysite/config/config.yml
 
 ```yaml
