@@ -10,7 +10,7 @@ class FlexiFormField extends DataObject
     protected $field_description = 'Override Me';
 
     // used to automatically generate fields during /dev/build
-    protected $field_definitions = array();
+    private static $required_field_definitions = array();
 
     private static $db = array(
         'FieldName' => 'Varchar(16)',
@@ -127,34 +127,25 @@ class FlexiFormField extends DataObject
         return (empty($value)) ? $this->FieldName : $value;
     }
 
-    public function getFlexiFieldDefinitions()
+    public function getRequiredFieldDefinitions()
     {
-        return $this->field_definitions;
+        return $this->stat('required_field_definitions');
     }
 
-    public function setFlexiFieldDefinitions(Array $flexi_field_definitions)
+    public function setRequiredFieldDefinitions(Array $required_field_definitions)
     {
-        return $this->field_definitions = $flexi_field_definitions;
+        return $this->set_stat('required_field_definitions', $required_field_definitions);
     }
 
     public function requireDefaultRecords()
     {
-        foreach ($this->getFlexiFieldDefinitions() as $definition) {
+        foreach ($this->getRequiredFieldDefinitions() as $definition) {
             FlexiFormUtil::AutoCreateFlexiField($this->ClassName, $definition);
-        }
-
-        if($yml_definitions = Config::inst()->get($this->ClassName, 'field_definitions')) {
-            foreach ($yml_definitions as $definition) {
-                FlexiFormUtil::AutoCreateFlexiField($this->ClassName, $definition);
-            }
         }
         return parent::requireDefaultRecords();
     }
 
     private static $indexes = array(
-        'FLEXI_READONLY' => array(
-            'type' => 'index',
-            'value' => 'Readonly'
-        )
+        'Readonly' => true
     );
 }

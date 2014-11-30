@@ -270,15 +270,17 @@ TODO: frontend field documentation &c.
 
 ### Programmatically adding fields
 
-The Environment Builder (/dev/build) is used to automatically create fields.
-FlexiFormFields with valid $field_definitions will be created. Fields can 
-share the same name providing they're a different type.
+The Environment Builder (/dev/build) is used to automatically create fields
+that specify the **$required_field_definitions** property. Fields can 
+share the same name providing they're of a different type.
 
-First, create your Custom Field with a valid **$field_definition** property.
+* Strategy 1: Overload the **$required_field_definitions** property
+
+First, create your Custom Field with a valid **$field_definitions** property.
 ```php
 class FlexiAuthorField extends FlexiFormOptionField
 {
-  protected $field_definitions = array(
+  protected $required_field_definition = array(
     array(
       'Name' => 'Author',
       'EmptyString' => 'Select your favorite Author',
@@ -295,24 +297,23 @@ class FlexiAuthorField extends FlexiFormOptionField
 
 }
 ```
-Second, trigger the Environment Builder (e.g. by visiting /dev/build)
 
-Alternatively, you can create fields through [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration).
-**This is especially useful for creating fields from built-in field types**. E.g. add the 
-following to mysite/config/config.yml
+
+* Strategy 2: Using [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration), **This is especially useful for creating fields from built-in field types**
 
 ```yaml
 ---
 FlexiFormTextField:
-  field_definitions: 
+  required_field_definition: 
     - { Name: FirstName }
     - { Name: LastName }
     
 FlexiFormDropdownField:
-  field_definitions:
+  required_field_definition:
     - { Name: Preference, Options: { Eastern: Abacus, Western: Calculator } }
 ``` 
 
+Be sure trigger the Environment Builder (e.g. by visiting /dev/build) after making changes.
 
 ### Readonly fields
 
@@ -321,7 +322,7 @@ FieldName, list of selectable options, &c. This flexibility may be
 unwanted in certain situations. 
 
 For instance, pretend you have a Custom Form that references a field named 
-'Email' in  _$default_flexi_fields_. Soon after, the admin renamed the 'Email' 
+'Email' in  _$initial_flexi_fields_. Soon after, the admin renamed the 'Email' 
 field to 'WorkEmail'. Now, whenever the Custom Form is created, a Validation 
 Exception will occur complaining that 'Email' is not found. 
 
@@ -335,7 +336,7 @@ normal fields as follows;
 ```php
 class FlexiAuthorField extends FlexiFormOptionField
 {
-  protected $field_definitions = array(
+  protected $required_field_definitions = array(
     array(
       'Name' => 'Author',
       'Readonly' => true,
@@ -348,6 +349,6 @@ or
 ```yaml
 ---
 FlexiAuthorField:
-  field_definitions: 
+  required_field_definitions: 
     - { Name: Author, Readonly: true }
 ```
