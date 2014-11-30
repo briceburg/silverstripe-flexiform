@@ -2,7 +2,8 @@
 
 class GridFieldConfig_FlexiForm extends GridFieldConfig
 {
-    public function __construct()
+
+    public function __construct($allowed_types)
     {
         $this->addComponent(new GridFieldButtonRow('before'));
         $this->addComponent(new GridFieldAddNewMultiClass('buttons-before-left'));
@@ -14,9 +15,29 @@ class GridFieldConfig_FlexiForm extends GridFieldConfig
         $this->addComponent(new GridFieldDeleteAction(true));
         $this->addComponent(new GridFieldDetailForm());
 
-
         $component = $this->getComponentByType('GridFieldAddExistingAutocompleter');
         $component->setPlaceholderText('Search Existing Fields by Name');
+
+        // Multi-Class Add Button
+        /////////////////////////
+
+
+        $classes = array();
+
+        if (empty($allowed_types)) {
+            $allowed_types = SS_ClassLoader::instance()->getManifest()->getDescendantsOf('FlexiFormField');
+        }
+
+        foreach ($allowed_types as $className) {
+            if ($className == 'FlexiFormOptionField') {
+                continue;
+            }
+            $class = singleton($className);
+            $classes[$className] = "{$class->Label()} Field";
+        }
+
+        $component = $this->getComponentByType('GridFieldAddNewMultiClass');
+        $component->setClasses($classes);
 
         // Validation
         // ///////////
@@ -32,39 +53,41 @@ class GridFieldConfig_FlexiForm extends GridFieldConfig
         // Inline Editing
         // ///////////////
         $component = $this->getComponentByType('GridFieldEditableColumns');
-        $component->setDisplayFields(array(
-            'Label' => array(
-                'title' => 'Type',
-                'field' => 'ReadonlyField'
-            ),
-            'Name' => array(
-                'title' => 'Name',
-                'field' => 'TextField'
-            ),
-            'Prompt' => array(
-                'title' => 'Prompt',
-                'field' => 'TextField'
-            ),
-            'DefaultValue' => array(
-                'title' => 'Default Value',
-                'callback' => function ($record, $column_name, $grid)
-                {
-                    return ($record->hasMethod('getDefaultValueFormField')) ?
-                        $record->getDefaultValueFormField('DefaultValue') : new TextField($column_name);
-                }
-            ),
-            'OptionsPreview' => array(
-                'title' => 'Options',
-                'field' => 'ReadonlyField'
-            ),
-            'Required' => array(
-                'title' => 'Required',
-                'field' => 'CheckboxField'
-            )
-        ));
+        $component->setDisplayFields(
+            array(
+                'Label' => array(
+                    'title' => 'Type',
+                    'field' => 'ReadonlyField'
+                ),
+                'Name' => array(
+                    'title' => 'Name',
+                    'field' => 'TextField'
+                ),
+                'Prompt' => array(
+                    'title' => 'Prompt',
+                    'field' => 'TextField'
+                ),
+                'DefaultValue' => array(
+                    'title' => 'Default Value',
+                    'callback' => function ($record, $column_name, $grid)
+                    {
+                        return ($record->hasMethod('getDefaultValueFormField')) ? $record->getDefaultValueFormField(
+                            'DefaultValue') : new TextField($column_name);
+                    }
+                ),
+                'OptionsPreview' => array(
+                    'title' => 'Options',
+                    'field' => 'ReadonlyField'
+                ),
+                'Required' => array(
+                    'title' => 'Required',
+                    'field' => 'CheckboxField'
+                )
+            ));
 
         // CSS improvements
         // /////////////////
+
 
         FlexiFormUtil::include_requirements();
     }

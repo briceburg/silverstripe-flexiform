@@ -16,7 +16,7 @@ Features
   * Programmatically define initial fields added to newly created forms
   * Limit allowed field types per form
 * **Many-many** relation between Form and Fields - reduced repetitiveness and improved consistency
-  * _many_many_extraFields_ allows per-form customization without disturbing other forms using the same field
+  * _extraFields_ allows per-form customization without disturbing other forms using the same field
 * Programatically create fields in the Environment Builder (during /dev/build)  
  
 
@@ -56,7 +56,7 @@ Coming Soon...
 ```
 
 You may, as always, override the [built-in templates](https://github.com/briceburg/silverstripe-flexiaddress/tree/master/templates) by
-adding them to your theme and changing markup as needed.
+adding them to your theme.
 
 
 
@@ -66,11 +66,6 @@ Configuration
 Most configuration is accomplished through the CMS -- however you can further 
 tailor behavior through subclassing (protected properties, getters, and setters)
 and [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration).
-
-For instance, A form's allowed field types are retrieved by the
- **getFlexiFormFieldTypes** method of the `FlexiFormExtension` class. This method returns 
- the protected **$flexiform_field_types** property, which 
-can be manipulated with **setFlexiFormFieldTypes** and **addFlexiFormFieldType** methods. 
 
 This approach allots flexibility and enables different strategies to accomplish 
 behavioral needs.
@@ -108,7 +103,7 @@ class FormPage extends Page {
 }
 ```
 
-* Strategy 3: Append a custom type via **addFlexiFormFieldType**
+* Strategy 3: Use the **setFlexiFormFieldTypes** setter method 
 
 ```php
 class FormPage extends Page {
@@ -120,7 +115,11 @@ class FormPage extends Page {
   public function getCMSFields()
   {
     // make configuration changes _BEFORE_ calling parent getCMSFields...
-    $this->addFlexiFormFieldType('MyCustomFlexiFormField');
+    $allowed_types = array(
+      'FlexiFormTextField',
+      'FlexiFormDropdownField'
+    );
+    $this->setFlexiFormFieldTypes($allowed_types);
     
     $fields = parent::getCMSFields();
     
@@ -271,8 +270,8 @@ TODO: frontend field documentation &c.
 ### Programmatically adding fields
 
 The Environment Builder (/dev/build) is used to automatically create fields
-that specify the **$required_field_definitions** property. Fields can 
-share the same name providing they're of a different type.
+specifying a **$required_field_definitions** property. Fields can 
+share a FieldName providing they're of a different type.
 
 * Strategy 1: Overload the **$required_field_definitions** property
 

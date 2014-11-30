@@ -10,17 +10,10 @@ class FlexiFormExtension extends DataExtension
     private static $flexiform_addButton = 'Create New Field';
 
     /**
-     * Allowed FlexiFormField Types
+     * Specify allowed FlexiFormField Types for this form. Empty to allow all.
      * @var Array
      */
-    private static $flexiform_field_types = array(
-        'FlexiFormTextField',
-        'FlexiFormEmailField',
-        'FlexiFormDropdownField',
-        'FlexiFormCheckboxField',
-        'FlexiFormRadioField',
-        'FlexiFormCheckboxSetField'
-    );
+    private static $flexiform_field_types = array();
 
     /**
      * An array of field definitions that are automatically added to newly
@@ -29,7 +22,9 @@ class FlexiFormExtension extends DataExtension
      */
     private static $flexiform_initial_fields = array();
 
-    private static $db = array();
+    private static $has_one = array(
+        'FlexiFormHandler' => 'FlexiFormHandler'
+    );
 
     private static $has_many = array(
         'Submissions'
@@ -53,22 +48,43 @@ class FlexiFormExtension extends DataExtension
     {
         if ($this->owner->exists()) {
 
-            $config = new GridFieldConfig_FlexiForm();
+            // Fields
+            /////////
 
-            // Multi-Class Add Button
-            // ///////////////////////
-            $classes = array();
-            foreach ($this->getFlexiFormFieldTypes() as $className) {
-                $class = singleton($className);
-                $classes[$className] = "{$class->Label()} Field";
-            }
-
+            $config = new GridFieldConfig_FlexiForm($this->getFlexiFormFieldTypes());
             $component = $config->getComponentByType('GridFieldAddNewMultiClass');
-            $component->setClasses($classes);
             $component->setTitle($this->getFlexiFormAddButton());
 
             $fields->addFieldToTab($this->getFlexiFormTab(),
-                new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config));
+                new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config),
+                $this->getFlexiFormInsertBefore());
+
+            // Handler
+            //////////
+
+            $field = new DropdownField('FlexiFormHandlerID','Handler',FlexiFormHandler::get()->map());
+
+            $fields->addFieldToTab($this->getFlexiFormTab(), $field, $this->getFlexiFormInsertBefore());
+
+
+
+            $field = new GridField('FlexiHandler', 'Form Handler', FlexiFormHandler::get(),
+                new GridFieldConfig_FlexiFormHandler());
+
+            $field->setModelClass('FlexiFormHandler');
+
+            $fields->addFieldToTab($this->getFlexiFormTab(), $field, $this->getFlexiFormInsertBefore());
+
+
+
+
+            $field = new GridField('FlexiHandlerB', 'Form Handler', FlexiFormHandler::get(),
+                new GridFieldConfig_RecordEditor());
+
+            $field->setModelClass('FlexiFormHandler');
+
+            $fields->addFieldToTab($this->getFlexiFormTab(), $field, $this->getFlexiFormInsertBefore());
+
         } else {
             $fields->addFieldToTab($this->getFlexiFormTab(),
                 new LiteralField('FlexiForm', '<p>Please save before editing the form.</p>'));
@@ -119,7 +135,7 @@ class FlexiFormExtension extends DataExtension
 
     public function getFlexiFormFieldTypes()
     {
-        return $this->lookup('flexiform_field_types', true);
+        return $this->lookup('flexiform_field_types');
     }
 
     public function setFlexiFormFieldTypes(Array $field_types)
@@ -127,25 +143,9 @@ class FlexiFormExtension extends DataExtension
         return $this->owner->set_stat('flexiform_field_types', $field_types);
     }
 
-    public function addFlexiFormFieldType($className)
-    {
-        if (! class_exists($className)) {
-            throw new Exception("FlexiFormField class $className not found");
-        }
-
-        if (! singleton($className)->is_a('FlexiFormField')) {
-            throw new Exception("$className is not a FlexiFormField");
-        }
-
-        $field_types = $this->getFlexiFormFieldTypes();
-        $field_types[] = $className;
-
-        return $this->setFlexiFormFieldTypes($field_types);
-    }
-
     public function getFlexiFormInitialFields()
     {
-        return $this->lookup('flexiform_initial_fields', true);
+        return $this->lookup('flexiform_initial_fields');
     }
 
     public function setFlexiFormInitialFields(Array $field_types)
@@ -165,7 +165,7 @@ class FlexiFormExtension extends DataExtension
         return $this->owner->stat($lookup);
     }
 
-    public function validate(ValidationResult $validationResult)
+    public function validate(ValidationResult $result)
     {
         $names = array();
         if ($result->valid()) {
