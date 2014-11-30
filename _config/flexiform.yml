@@ -2,4 +2,7 @@
 name: flexiform
 ---
 
-FlexiFormExtension:
+FlexiFormBasicHandler:
+  required_handler_definitions:
+    - { Name: Default, Readonly: true } 
+    

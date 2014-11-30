@@ -22,10 +22,6 @@ class FlexiFormField extends DataObject
         'Options' => 'FlexiFormFieldOption'
     );
 
-    private static $belongs_many_many = array(
-        'FlexiForms' => 'FlexiForm'
-    );
-
     private static $searchable_fields = array(
         'FieldName' => array(
             'title' => 'Name',
@@ -38,7 +34,7 @@ class FlexiFormField extends DataObject
         'FieldName' => 'Name'
     );
 
-    function getCMSFields()
+    public function getCMSFields()
     {
         $fields = parent::getCMSFields();
 

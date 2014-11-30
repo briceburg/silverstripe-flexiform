@@ -10,53 +10,61 @@ class FlexiFormUtil
         return basename(dirname(dirname(__DIR__)));
     }
 
-
     public static function include_requirements()
     {
         $moduleDir = self::get_module_dir();
         Requirements::css($moduleDir . '/css/flexiform.css');
     }
 
-    public static function CreateFlexiField($field_type, $definition){
-
-        if(!isset($definition['Name']) || empty($definition['Name'])) {
+    public static function CreateFlexiField($className, $definition)
+    {
+        if (! isset($definition['Name']) || empty($definition['Name'])) {
             throw new ValidationException('Flexi Field definitions must specify a Name');
         }
 
-        if(isset($definition['Options']) && !is_array($definition['Options'])) {
+        if (isset($definition['Options']) && ! is_array($definition['Options'])) {
             throw new ValidationException('Options must be an Array in Flexi Field definitions');
         }
 
-        if(!class_exists($field_type)) {
-            throw new ValidationException($field_type . ' is an unknown FlexiFormField Type');
+        if (! class_exists($className)) {
+            throw new ValidationException($className . ' is an unknown FlexiFormField Type');
         }
 
-        if(isset($definition['Options']) && !singleton($field_type)->is_a('FlexiFormOptionField')) {
-            throw new ValidationException($field_type . ' must subclass FlexiFormOptionField to contain options');
+        $singleton = singleton($className);
+
+        if (! $singleton->is_a('FlexiFormField')) {
+            throw new ValidationException($className . ' must subclass FlexiFormField');
         }
 
-        $field = new $field_type();
-        $field->FieldName = $definition['Name'];
+        if (isset($definition['Options']) && ! $singleton->is_a('FlexiFormOptionField')) {
+            throw new ValidationException($className . ' must subclass FlexiFormOptionField to contain options');
+        }
 
-        if(isset($definition['DefaultValue'])) {
-            $field->FieldDefaultValue = $definition['DefaultValue'];
+        // instantiate new object
+        /////////////////////////
+
+
+        $obj = new $className();
+        $obj->FieldName = $definition['Name'];
+
+        if (isset($definition['DefaultValue'])) {
+            $obj->FieldDefaultValue = $definition['DefaultValue'];
         }
 
         // add field properties
-        foreach(array_intersect_key($definition,$field->db()) as $property => $value) {
-            $field->$property = $value;
+        foreach (array_intersect_key($definition, $obj->db()) as $property => $value) {
+            $obj->$property = $value;
         }
 
         // disable validation while we write
         $flag = Config::inst()->get('DataObject', 'validation_enabled');
-        Config::inst()->update('DataObject', 'validation_enabled',false);
-        $field->write();
-        Config::inst()->update('DataObject', 'validation_enabled',$flag);
+        Config::inst()->update('DataObject', 'validation_enabled', false);
+        $obj->write();
+        Config::inst()->update('DataObject', 'validation_enabled', $flag);
 
-
-        if(isset($definition['Options'])) {
-            $options = $field->Options();
-            foreach($definition['Options'] as $value => $label) {
+        if (isset($definition['Options'])) {
+            $options = $obj->Options();
+            foreach ($definition['Options'] as $value => $label) {
                 $option = new FlexiFormFieldOption();
                 $option->Value = $value;
                 $option->Label = $label;
@@ -64,11 +72,11 @@ class FlexiFormUtil
             }
         }
 
-        return $field;
+        return $obj;
     }
 
-    public static function AutoCreateFlexiField($field_type, $definition){
-
+    public static function AutoCreateFlexiField($className, $definition)
+    {
         $readonly = (isset($definition['Readonly']) && $definition['Readonly']);
 
         $filter = array(
@@ -77,19 +85,71 @@ class FlexiFormUtil
         );
 
         // allow same names on non readonly fields if they're different classes
-        if(!$readonly) {
-            $filter['ClassName'] = $field_type;
+        if (! $readonly) {
+            $filter['ClassName'] = $className;
         }
 
         // only create field if it's name doesn't yet exist
         if (! FlexiFormField::get()->filter($filter)->first()) {
 
-            if ($field = FlexiFormUtil::CreateFlexiField($field_type, $definition)) {
-                $prefix = ($field->Readonly) ? 'Readonly' : 'Normal';
-                DB::alteration_message(
-                "flexiform - Created $prefix $field_type named `{$field->FieldName}`.",
-                "created");
+            if ($obj = FlexiFormUtil::CreateFlexiField($className, $definition)) {
+                $prefix = ($obj->Readonly) ? 'Readonly' : 'Normal';
+                DB::alteration_message("flexiform - Created $prefix $className named `{$obj->FieldName}`.",
+                    "created");
             }
         }
     }
+
+    public static function CreateFlexiHandler($className, $definition)
+    {
+        if (! isset($definition['Name']) || empty($definition['Name'])) {
+            throw new ValidationException('Flexi Handler definitions must specify a Name');
+        }
+
+        if (! class_exists($className)) {
+            throw new ValidationException($className . ' is an unknown FlexiFormHandler Type');
+        }
+
+        $singleton = singleton($className);
+
+        if (! $singleton->is_a('FlexiFormHandler')) {
+            throw new ValidationException($className . ' must subclass FlexiFormHandler');
+        }
+
+        // instantiate new object
+        /////////////////////////
+
+
+        $obj = new $className();
+        $obj->HandlerName = $definition['Name'];
+        $obj->SystemCreated = true; // flag as system created
+
+        // add field properties
+        foreach (array_intersect_key($definition, $obj->db()) as $property => $value) {
+            $obj->$property = $value;
+        }
+
+        // disable validation while we write
+        $obj->write();
+
+        return $obj;
+    }
+
+    public static function AutoCreateFlexiHandler($className, $definition)
+    {
+        // Handler Names are Unique.
+        $filter = array(
+            'HandlerName' => $definition['Name'],
+        );
+
+        // only create handler it doesn't yet exist
+        if (! FlexiFormHandler::get()->filter($filter)->first()) {
+
+            if ($obj = FlexiFormUtil::CreateFlexiHandler($className, $definition)) {
+                DB::alteration_message("flexiform - Created $className named `{$obj->HandlerName}`.",
+                    "created");
+            }
+        }
+    }
+
 }

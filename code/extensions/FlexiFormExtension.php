@@ -3,6 +3,12 @@
 class FlexiFormExtension extends DataExtension
 {
 
+    /**
+     * Toggles appending flexiform fields to the CMS.
+     * @var Boolean
+     */
+    private static $flexiform_update_cms_fields = true;
+
     private static $flexiform_tab = 'Root.Form';
 
     private static $flexiform_insertBefore = null;
@@ -21,6 +27,12 @@ class FlexiFormExtension extends DataExtension
      * @var Array
      */
     private static $flexiform_initial_fields = array();
+
+    /**
+     * The name of the default handler for this form. See flexiform.yml
+     * @var String
+     */
+    private static $flexiform_default_handler_name = 'Default';
 
     private static $has_one = array(
         'FlexiFormHandler' => 'FlexiFormHandler'
@@ -44,47 +56,60 @@ class FlexiFormExtension extends DataExtension
         )
     );
 
+    public function populateDefaults()
+    {
+        // do not attempt looking up handlers if database tables are not ready
+        if (! Controller::curr()->is_a('DatabaseAdmin')) {
+            if ($name = $this->getFlexiFormDefaultHandlerName()) {
+                if ($handler = FlexiFormHandler::get()->filter('HandlerName', $name)->first()) {
+                    $this->owner->FlexiFormHandlerID = $handler->ID;
+                }
+            }
+        }
+    }
+
     public function updateCMSFields(FieldList $fields)
     {
+        if (! $this->getFlexiFormUpdateCMSFields()) {
+            return;
+        }
+
         if ($this->owner->exists()) {
+
+            $fields_tab = new Tab('Fields');
+            $settings_tab = new Tab('Settings');
+
+            $fields->addFieldToTab($this->getFlexiFormTab(),
+                new TabSet('flexiform', $fields_tab, $settings_tab), $this->getFlexiFormInsertBefore());
 
             // Fields
             /////////
+
 
             $config = new GridFieldConfig_FlexiForm($this->getFlexiFormFieldTypes());
             $component = $config->getComponentByType('GridFieldAddNewMultiClass');
             $component->setTitle($this->getFlexiFormAddButton());
 
-            $fields->addFieldToTab($this->getFlexiFormTab(),
-                new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config),
-                $this->getFlexiFormInsertBefore());
+            $fields_tab->push(
+                new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config));
 
-            // Handler
-            //////////
-
-            $field = new DropdownField('FlexiFormHandlerID','Handler',FlexiFormHandler::get()->map());
-
-            $fields->addFieldToTab($this->getFlexiFormTab(), $field, $this->getFlexiFormInsertBefore());
+            // Settings
+            ///////////
 
 
+            $singleton = singleton('FlexiFormHandler');
+            $singleton->set_stat('selected_handler_id', $this->owner->FlexiFormHandlerID);
 
-            $field = new GridField('FlexiHandler', 'Form Handler', FlexiFormHandler::get(),
-                new GridFieldConfig_FlexiFormHandler());
+            $settings_tab->push(
+                new DropdownField('FlexiFormHandlerID', 'Form Handler', FlexiFormHandler::get()->map()));
 
-            $field->setModelClass('FlexiFormHandler');
+            $field = new ToggleCompositeField('ManageHandlers', 'Manage Handlers',
+                array(
+                    new GridField('FlexiHandlers', 'Handlers', FlexiFormHandler::get(),
+                        new GridFieldConfig_FlexiFormHandler())
+                ));
 
-            $fields->addFieldToTab($this->getFlexiFormTab(), $field, $this->getFlexiFormInsertBefore());
-
-
-
-
-            $field = new GridField('FlexiHandlerB', 'Form Handler', FlexiFormHandler::get(),
-                new GridFieldConfig_RecordEditor());
-
-            $field->setModelClass('FlexiFormHandler');
-
-            $fields->addFieldToTab($this->getFlexiFormTab(), $field, $this->getFlexiFormInsertBefore());
-
+            $settings_tab->push($field);
         } else {
             $fields->addFieldToTab($this->getFlexiFormTab(),
                 new LiteralField('FlexiForm', '<p>Please save before editing the form.</p>'));
@@ -103,6 +128,16 @@ class FlexiFormExtension extends DataExtension
 
     // Getters & Setters
     ////////////////////
+    public function getFlexiFormUpdateCMSFields()
+    {
+        return $this->lookup('flexiform_update_cms_fields');
+    }
+
+    public function setFlexiFormUpdateCMSFields($boolean)
+    {
+        return $this->owner->set_stat('flexiform_update_cms_fields', $boolean);
+    }
+
     public function getFlexiFormTab()
     {
         return $this->lookup('flexiform_tab');
@@ -153,6 +188,16 @@ class FlexiFormExtension extends DataExtension
         return $this->owner->set_stat('flexiform_initial_fields', $field_types);
     }
 
+    public function getFlexiFormDefaultHandlerName()
+    {
+        return $this->lookup('flexiform_default_handler_name');
+    }
+
+    public function setFlexiFormDefaultHandlerName($handler_name)
+    {
+        return $this->owner->set_stat('flexiform_default_handler_name', $name);
+    }
+
     // Utility Methods
     //////////////////
     private function lookup($lookup, $do_not_merge = false)
@@ -191,6 +236,10 @@ class FlexiFormExtension extends DataExtension
                     break;
                 }
             }
+
+            if ($this->owner->exists() && ! $this->owner->FlexiFormHandler()->exists()) {
+                $result->error("Please select a valid Form Handler");
+            }
         }
     }
 
@@ -224,6 +273,18 @@ class FlexiFormExtension extends DataExtension
             }
         }
 
+        // add the handler mapping
+        if ($this->owner->exists()) {
+            FlexiFormHandlerMapping::addMapping($this->owner->FlexiFormHandler(), $this->owner);
+        }
+
         return parent::onAfterWrite();
+    }
+
+    public function onBeforeDelete()
+    {
+        FlexiFormHandlerMapping::removeFormMapping($this->owner);
+
+        return parent::onBeforeDelete();
     }
 }

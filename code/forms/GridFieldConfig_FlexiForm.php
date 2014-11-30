@@ -3,7 +3,7 @@
 class GridFieldConfig_FlexiForm extends GridFieldConfig
 {
 
-    public function __construct($allowed_types)
+    public function __construct($allowed_types = array())
     {
         $this->addComponent(new GridFieldButtonRow('before'));
         $this->addComponent(new GridFieldAddNewMultiClass('buttons-before-left'));
