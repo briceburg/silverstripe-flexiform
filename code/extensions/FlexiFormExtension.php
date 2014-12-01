@@ -38,10 +38,6 @@ class FlexiFormExtension extends DataExtension
         'FlexiFormHandler' => 'FlexiFormHandler'
     );
 
-    private static $has_many = array(
-        'Submissions'
-    );
-
     private static $many_many = array(
         'FlexiFormFields' => 'FlexiFormField'
     );
@@ -80,7 +76,8 @@ class FlexiFormExtension extends DataExtension
             $settings_tab = new Tab('Settings');
 
             $fields->addFieldToTab($this->getFlexiFormTab(),
-                new TabSet('flexiform', $fields_tab, $settings_tab), $this->getFlexiFormInsertBefore());
+                $flexi_tabs = new TabSet('flexiform', $fields_tab, $settings_tab),
+                $this->getFlexiFormInsertBefore());
 
             // Fields
             /////////
@@ -110,6 +107,24 @@ class FlexiFormExtension extends DataExtension
                 ));
 
             $settings_tab->push($field);
+
+            // Handler-specific Fields
+            //////////////////////////
+
+
+            $handler = $this->owner->FlexiFormHandler();
+            if ($handler->exists()) {
+
+                $other_form_count = $handler->FormCount() - 1;
+                $plural = ($other_form_count > 1) ? 'forms' : 'form';
+                $description = ($other_form_count) ? "<em>Your changes will impact <strong>$other_form_count other $plural</strong>. If you would like your changes to impact only this form, create a new handler.</em>" : '';
+                $field = new LiteralField('HandlerSettings', "<h3>Handler Settings</h3>$description");
+
+                $settings_tab->push($field);
+
+                // let selected handler augment fields
+                $handler->updateCMSFlexiTabs($flexi_tabs, $this->owner);
+            }
         } else {
             $fields->addFieldToTab($this->getFlexiFormTab(),
                 new LiteralField('FlexiForm', '<p>Please save before editing the form.</p>'));

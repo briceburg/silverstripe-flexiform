@@ -2,7 +2,9 @@
 
 class FlexiFormHandler extends DataObject
 {
+
     protected $handler_label = 'Override Me';
+
     protected $handler_description = 'Override Me';
 
     // used to automatically generate handlers during /dev/build
@@ -14,25 +16,26 @@ class FlexiFormHandler extends DataObject
         'Readonly' => 'Boolean'
     );
 
-
-    public function canDelete($member = null) {
-        if($this->Readonly) {
+    public function canDelete($member = null)
+    {
+        if ($this->Readonly) {
             return false;
         }
 
-        if($this->getSelected()) {
+        if ($this->getSelected()) {
             return false;
         }
 
         // more than the current form will be impacted...
-        if($this->exists() && FlexiFormHandlerMapping::count($this)) {
+        if ($this->FormCount()) {
             return false;
         }
 
-        return  parent::canDelete($member);
+        return parent::canDelete($member);
     }
 
-    public function getCMSFields() {
+    public function getCMSFields()
+    {
         $fields = parent::getCMSFields();
         $fields->removeByName('Readonly');
         $fields->dataFieldByName('HandlerName')->setTitle('Name');
@@ -44,6 +47,8 @@ class FlexiFormHandler extends DataObject
         return $fields;
     }
 
+    public function updateCMSFlexiTabs(TabSet $fields, $form)
+    {}
 
     protected function onSubmit()
     {}
@@ -51,25 +56,22 @@ class FlexiFormHandler extends DataObject
     protected function onSuccess()
     {}
 
-
     // Templates
     ////////////
-
     public function Label()
     {
         return $this->handler_label;
     }
 
-    public function DescriptionPreview() {
+    public function DescriptionPreview()
+    {
         return $this->dbObject('Description')->LimitCharacters(77);
     }
 
-    public function FormCount(){
-        $count = FlexiFormHandlerMapping::count($this);
-        return ($count) ? $count : '0 ';
+    public function FormCount()
+    {
+        return ($this->exists()) ? FlexiFormHandlerMapping::count($this) : 0;
     }
-
-
 
     // Getters & Setters
     ////////////////////
@@ -83,7 +85,8 @@ class FlexiFormHandler extends DataObject
         return $this->set_stat('required_handler_definitions', $definitions);
     }
 
-    public function getSelected(){
+    public function getSelected()
+    {
         return ($this->ID == $this->stat('selected_handler_id'));
     }
 
@@ -92,20 +95,18 @@ class FlexiFormHandler extends DataObject
     private function lookup($lookup, $do_not_merge = false)
     {
         if ($do_not_merge &&
-            $unmerged = Config::inst()->get($this->owner->class, $lookup, Config::EXCLUDE_EXTRA_SOURCES)) {
-                return $unmerged;
-            }
+             $unmerged = Config::inst()->get($this->owner->class, $lookup, Config::EXCLUDE_EXTRA_SOURCES)) {
+            return $unmerged;
+        }
 
-            return $this->owner->stat($lookup);
+        return $this->owner->stat($lookup);
     }
-
 
     public function getTitle()
     {
         $readonly = ($this->Readonly) ? '*' : '';
         return "{$this->HandlerName} ({$this->handler_label})$readonly";
     }
-
 
     public function requireDefaultRecords()
     {
@@ -115,8 +116,9 @@ class FlexiFormHandler extends DataObject
         return parent::requireDefaultRecords();
     }
 
-    public function onBeforeWrite(){
-        if(empty($this->Description)) {
+    public function onBeforeWrite()
+    {
+        if (empty($this->Description)) {
             $this->Description = $this->handler_description;
         }
         return parent::onBeforeWrite();
