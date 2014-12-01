@@ -6,8 +6,8 @@ class FlexiFormHandlerMapping extends DataObject
 {
 
     private static $db = array(
-        'FormID' => 'Int',
-        'FormClass' => 'Varchar'
+        'FlexiFormID' => 'Int',
+        'FlexiFormClass' => 'Varchar'
     );
 
     private static $has_one = array(
@@ -23,40 +23,40 @@ class FlexiFormHandlerMapping extends DataObject
         return DataObject::get(get_class())->filter('HandlerID', $handler->ID)->count();
     }
 
-    public static function addMapping($handler, $form)
+    public static function addMapping($handler, $flexi)
     {
         if (! $handler->exists()) {
             throw new Exception('Handler does not exist');
         }
-        if (! $form->exists()) {
+        if (! $flexi->exists()) {
             throw new Exception('Form does not exist');
         }
 
         if (! $mapping = DataObject::get(get_class())->filter(
             array(
-                'FormID' => $form->ID,
-                'FormClass' => $form->class
+                'FlexiFormID' => $flexi->ID,
+                'FlexiFormClass' => $flexi->class
             ))->first()) {
             $mapping_class = get_class();
             $mapping = new $mapping_class();
-            $mapping->FormID = $form->ID;
-            $mapping->FormClass = $form->class;
+            $mapping->FlexiFormID = $flexi->ID;
+            $mapping->FlexiFormClass = $flexi->class;
         }
 
         $mapping->HandlerID = $handler->ID;
         $mapping->write();
     }
 
-    public static function removeFormMapping($form)
+    public static function removeFormMapping($flexi)
     {
-        if (! $form->exists()) {
+        if (! $flexi->exists()) {
             throw new Exception('Form does not exist');
         }
 
         foreach (DataObject::get(get_class())->filter(
             array(
-                'FormID' => $form->ID,
-                'FormClass' => $form->class
+                'FlexiFormID' => $flexi->ID,
+                'FlexiFormClass' => $flexi->class
             )) as $mapping) {
             $mapping->delete();
         }

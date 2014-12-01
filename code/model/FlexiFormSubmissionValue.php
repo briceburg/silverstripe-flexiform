@@ -10,8 +10,7 @@ class FlexiFormSubmissionValue extends DataObject {
     );
 
     private static $has_one = array(
-        'Submission' => 'FormFieldSubmission',
-        'Member' => 'Member'
+        'Submission' => 'FlexiFormSubmission'
     );
 
 }

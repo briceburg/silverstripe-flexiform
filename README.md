@@ -9,14 +9,17 @@ Features
 * Add forms to DataObjects or Pages
 * GridField based management of fields, options, submissions, actions, &c.
   * 100% compatible with [holder pages](https://github.com/briceburg/silverstripe-holderpage) & VersionedGridfield
-* Extensible Fields (`FlexiFormField`), Handlers (`FlexiFormHandler`), and Forms (`FlexiFormExtension`)
 * Programmatically define initial fields and handlers + build them from the Environment Builder
-* **Many-many** relation between Form and Fields - reduced repetitiveness and improved consistency
+* **Many-many** between Form and `FlexiFormField`, **has_many** between `FlexiFormHandler`
+  * reduced repetitiveness and improved consistency
   * _extraFields_ allows per-form customization without disturbing other forms using the same field
  
 
 **Pre-Release Status** - Field managment + submissions are in place. Still tuning & documenting.
-For now, **be the source, be the source Danny**. Comments / PRs welcome!
+
+For now, **be the source, be the source Danny**. 
+
+Comments / PRs welcome!
 
 
 Requirements
@@ -45,8 +48,7 @@ class Event extends DataObject
 Trigger the environment builder (/dev/build) after extending objects --
 You will now see the Form tab when editing Event in the CMS.
 
-* To display forms on the Front-End, add **$FlexiForm** to your template. 
-Here's a sample Event.ss;
+* To display flexiforms, add **$FlexiForm** to your template. Here's a sample Event.ss;
 
 ```html
 <div class="width-30">
@@ -81,9 +83,6 @@ class FormPage_Controller extends Page_Controller {
 
 // and modify MyFormTemplate.ss in your themedir accordingly...
 ```
-
-and use **$MyFlexiForm** in your template instead.
-
 
 Configuration
 =============

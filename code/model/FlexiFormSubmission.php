@@ -3,8 +3,8 @@
 class FlexiFormSubmission extends DataObject {
 
     private static $db = array(
-        'FormID' => 'Int',
-        'FormClass' => 'Varchar',
+        'FlexiFormID' => 'Int',
+        'FlexiFormClass' => 'Varchar',
         'IPAddress' => 'Varchar(45)'
     );
 

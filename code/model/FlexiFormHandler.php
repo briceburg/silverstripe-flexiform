@@ -55,7 +55,7 @@ class FlexiFormHandler extends DataObject
         return $fields;
     }
 
-    public function updateCMSFlexiTabs(TabSet $fields, $form)
+    public function updateCMSFlexiTabs(TabSet $fields, $flexi)
     {
         $field = new HiddenField('FlexiFormHandlerSettings', 'FlexiFormHandlerSettings', true);
         $fields->insertAfter($field, 'HandlerSettings');
@@ -63,24 +63,52 @@ class FlexiFormHandler extends DataObject
         // FlexiFormHandlerSetting[<fieldname>] hack to allow editing handler
         //  from form gridfield, perhaps use gridfieldaddons editor instead?
 
-        $field = new TextField('FlexiFormHandlerSetting[SubmitButtonText]', 'Submit Button Text',$this->SubmitButtonText);
+
+        $field = new TextField('FlexiFormHandlerSetting[SubmitButtonText]', 'Submit Button Text',
+            $this->SubmitButtonText);
         $fields->insertAfter($field, 'HandlerSettings');
     }
 
-    public function getFrontEndFormValidator($flexi, $front_end_fields){
-
+    public function getFrontEndFormValidator($flexi)
+    {
         $validator = new RequiredFields();
-        foreach($flexi->FlexiFormFields()->filter('Required',true) as $field) {
+        foreach ($flexi->FlexiFormFields()->filter('Required', true) as $field) {
             $validator->addRequiredField($field->SafeName());
         }
 
         return $validator;
     }
 
-    protected function onSubmit()
-    {}
+    /**
+     * onSubmit is called after a submission is received and passed validation.
+     * Use it to process form data - such as persisting the submission in
+     * the database, sending [asynchronous] notifications , etc.
+     *
+     * Returning false will stop the form from processing. It's a good idea to
+     * add an errorMessage to the form if you do this.
+     *
+     * @param Array $data
+     * @param Form $form
+     * @param DataObject $flexi The object extended by FlexiFormExtension
+     * @return Boolean
+     */
+    public function onSubmit($data, $form, $flexi)
+    {
+        return true;
+    }
 
-    protected function onSuccess()
+    /**
+     * onSuccess is called if onSubmit returns truthy. Use it to handle
+     * post-submit workflow.
+     *
+     * If this function returns a value, the return value will be passed to
+     * the template instead of the form. E.g. Display a "Thank You" Message.
+     *
+     * @param Array $data
+     * @param Form $form
+     * @param DataObject $flexi The object extended by FlexiFormExtension
+     */
+    public function onSuccess($flexi)
     {}
 
     // Templates

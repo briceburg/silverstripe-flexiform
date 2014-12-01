@@ -140,7 +140,7 @@ class FlexiFormExtension extends DataExtension
     {
         $fields = new FieldList();
         foreach ($this->owner->FlexiFormFields() as $flexi_field) {
-            $title = (empty($flexi_field->Prompt)) ? $flexi_field->Name : $flexi_field->Prompt;
+            $title = (empty($flexi_field->Prompt)) ? $flexi_field->getName() : $flexi_field->Prompt;
             $fields->push($flexi_field->getFormField($title, $flexi_field->DefaultValue, $flexi_field->Required));
         }
         return $fields;
