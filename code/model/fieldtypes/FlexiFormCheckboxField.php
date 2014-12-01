@@ -27,4 +27,8 @@ class FlexiFormCheckboxField extends FlexiFormField
             ));
         return $field;
     }
+
+    public function transformValue($value) {
+        return ($value) ? 'checked' : 'unchecked';
+    }
 }

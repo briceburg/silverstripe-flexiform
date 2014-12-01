@@ -1,6 +1,7 @@
 <?php
 
-class FlexiFormSubmission extends DataObject {
+class FlexiFormSubmission extends DataObject
+{
 
     private static $db = array(
         'FlexiFormID' => 'Int',
@@ -16,13 +17,47 @@ class FlexiFormSubmission extends DataObject {
         'Values' => 'FlexiFormSubmissionValue'
     );
 
+    private static $summary_fields = array(
+        'SubmittedBy' => 'Submitted By',
+        'Created' => 'Time Submitted',
+        'Values.Count' => 'Response Count'
+    );
 
-    public function populateDefaults() {
-
+    public function populateDefaults()
+    {
         $this->IPAddress = Controller::curr()->getRequest()->getIP();
         $this->MemberID = Member::currentUserID();
 
         return parent::populateDefaults();
+    }
+
+    public function getCMSFields()
+    {
+        $fields = singleton('DataObject')->getCMSFields();
+
+        $fields->addFieldsToTab('Root.Main',
+            array(
+                new ReadonlyField('SubmittedBy', 'Submitted By'),
+                new ReadonlyField('IPAddress', 'IP Address'),
+                new ReadonlyField('Created', 'Time Submitted'),
+                new HeaderField('Responses')
+            ));
+
+        foreach ($this->Values() as $value) {
+
+            $transformed_value = class_exists($value->FormFieldClass) ? singleton($value->FormFieldClass)->transformValue(
+                $value->Value) : $value->Value;
+
+            $fields->addFieldToTab('Root.Main',
+                new ReadonlyField(sprintf('r%s', $value->ID), $value->Name, $transformed_value));
+        }
+
+        return $fields;
+    }
+
+    public function getSubmittedBy()
+    {
+        return ($this->MemberID) ? $this->Member()->getName() : 'Site Visitor';
     }
 }
 

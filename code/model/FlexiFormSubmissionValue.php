@@ -13,4 +13,8 @@ class FlexiFormSubmissionValue extends DataObject {
         'Submission' => 'FlexiFormSubmission'
     );
 
+    private static $default_sort = array(
+        'Name'
+    );
+
 }

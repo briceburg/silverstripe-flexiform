@@ -146,6 +146,10 @@ class FlexiFormField extends DataObject
         return '-';
     }
 
+    public function transformValue($value) {
+        return $value;
+    }
+
     public function getTitle()
     {
         $readonly = ($this->Readonly) ? '*' : '';
