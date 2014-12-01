@@ -24,9 +24,14 @@ class FlexiFormField extends DataObject
 
     private static $searchable_fields = array(
         'FieldName' => array(
-            'title' => 'Name',
             'field' => 'TextField',
-            'filter' => 'PartialMatchFilter'
+            'filter' => 'PartialMatchFilter',
+            'title' => 'Name'
+        ),
+        'ClassName' => array(
+            'field' => 'DropdownField',
+            'filter' => 'ExactMatchFilter',
+            'title' => 'Type'
         )
     );
 
@@ -35,7 +40,7 @@ class FlexiFormField extends DataObject
     );
 
     private static $default_sort = array(
-        'SortOrder'
+        'FieldName'
     );
 
     public function getCMSFields()
@@ -79,6 +84,17 @@ class FlexiFormField extends DataObject
         return $result;
     }
 
+    public function scaffoldSearchFields($_params = null)
+    {
+        $fields = parent::scaffoldSearchFields($_params);
+
+        $field = $fields->dataFieldByName('ClassName');
+        $field->setSource($this->getAllowedFieldTypeClassNames());
+        $field->setEmptyString('Select Type');
+
+        return $fields;
+    }
+
     /*
      * Get the field used in the front end. A great hook for customizing
      * validation and attributes. Always use SafeName method for field name.
@@ -88,24 +104,23 @@ class FlexiFormField extends DataObject
      * @param boolean $required if field is required for submission
      * @return FormField
      */
-
     public function getFormField($title = null, $value = null, $required = false)
     {
         $field_class = $this->field_class;
 
-        if(!$title) {
+        if (! $title) {
             $title = $this->getName();
         }
 
         $field = new $field_class($this->SafeName(), $title);
 
-        if($value) {
+        if ($value) {
             $field->setValue($value);
         }
 
-        if($required){
+        if ($required) {
             // add html5 required attribute
-            $field->setAttribute('required',true);
+            $field->setAttribute('required', true);
         }
 
         return $field;
@@ -121,8 +136,9 @@ class FlexiFormField extends DataObject
         return $this->field_description;
     }
 
-    public function SafeName(){
-        return sprintf('%s_%s',$this->ClassName,$this->ID);
+    public function SafeName()
+    {
+        return sprintf('%s_%s', $this->ClassName, $this->ID);
     }
 
     public function OptionsPreview()
@@ -158,6 +174,33 @@ class FlexiFormField extends DataObject
     public function setRequiredFieldDefinitions(Array $required_field_definitions)
     {
         return $this->set_stat('required_field_definitions', $required_field_definitions);
+    }
+
+    public function getAllowedFieldTypes()
+    {
+        if (! $fields = $this->stat('allowed_field_types')) {
+            $fields = SS_ClassLoader::instance()->getManifest()->getDescendantsOf('FlexiFormField');
+        }
+        return $fields;
+    }
+
+    public function setAllowedFieldTypes($field_classnames)
+    {
+        return $this->set_stat('allowed_field_types', $field_classnames);
+    }
+
+    public function getAllowedFieldTypeClassNames()
+    {
+        $classes = array();
+        foreach ($this->getAllowedFieldTypes() as $className) {
+            if ($className == 'FlexiFormOptionField') {
+                continue;
+            }
+            $class = singleton($className);
+            $classes[$className] = "{$class->Label()} Field";
+        }
+
+        return $classes;
     }
 
     public function requireDefaultRecords()

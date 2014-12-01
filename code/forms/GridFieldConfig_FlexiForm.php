@@ -3,11 +3,11 @@
 class GridFieldConfig_FlexiForm extends GridFieldConfig
 {
 
-    public function __construct($allowed_types = array())
+    public function __construct()
     {
         $this->addComponent(new GridFieldButtonRow('before'));
         $this->addComponent(new GridFieldAddNewMultiClass('buttons-before-left'));
-        $this->addComponent(new GridFieldAddExistingAutocompleter('buttons-before-right'));
+        $this->addComponent(new GridFieldAddExistingSearchButton('buttons-before-right'));
         $this->addComponent(new GridFieldToolbarHeader());
         $this->addComponent(new GridFieldTitleHeader());
         $this->addComponent(new GridFieldEditableColumns());
@@ -15,29 +15,12 @@ class GridFieldConfig_FlexiForm extends GridFieldConfig
         $this->addComponent(new GridFieldDeleteAction(true));
         $this->addComponent(new GridFieldDetailForm());
 
-        $component = $this->getComponentByType('GridFieldAddExistingAutocompleter');
-        $component->setPlaceholderText('Search Existing Fields by Name');
 
         // Multi-Class Add Button
         /////////////////////////
 
-
-        $classes = array();
-
-        if (empty($allowed_types)) {
-            $allowed_types = SS_ClassLoader::instance()->getManifest()->getDescendantsOf('FlexiFormField');
-        }
-
-        foreach ($allowed_types as $className) {
-            if ($className == 'FlexiFormOptionField') {
-                continue;
-            }
-            $class = singleton($className);
-            $classes[$className] = "{$class->Label()} Field";
-        }
-
         $component = $this->getComponentByType('GridFieldAddNewMultiClass');
-        $component->setClasses($classes);
+        $component->setClasses(singleton('FlexiFormField')->getAllowedFieldTypeClassNames());
 
         // Validation
         // ///////////

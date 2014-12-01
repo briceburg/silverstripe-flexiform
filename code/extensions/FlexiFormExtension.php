@@ -82,8 +82,12 @@ class FlexiFormExtension extends DataExtension
             // Fields
             /////////
 
+            if($allowed_types = $this->getFlexiFormFieldTypes()) {
+                $singleton = singleton('FlexiFormField');
+                $singleton->setAllowedFieldTypes($allowed_types);
+            }
 
-            $config = new GridFieldConfig_FlexiForm($this->getFlexiFormFieldTypes());
+            $config = new GridFieldConfig_FlexiForm();
             $component = $config->getComponentByType('GridFieldAddNewMultiClass');
             $component->setTitle($this->getFlexiFormAddButton());
 
@@ -139,7 +143,7 @@ class FlexiFormExtension extends DataExtension
     public function getFlexiFormFrontEndFields()
     {
         $fields = new FieldList();
-        foreach ($this->owner->FlexiFormFields() as $flexi_field) {
+        foreach ($this->owner->FlexiFormFields()->sort('SortOrder') as $flexi_field) {
             $title = (empty($flexi_field->Prompt)) ? $flexi_field->getName() : $flexi_field->Prompt;
             $fields->push($flexi_field->getFormField($title, $flexi_field->DefaultValue, $flexi_field->Required));
         }
