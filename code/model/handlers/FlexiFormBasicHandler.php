@@ -16,7 +16,7 @@ class FlexiFormBasicHandler extends FlexiFormHandler
 
         $submissions_tab->push(
             new GridField('FlexiFormSubmissions', 'Submissions', $this->getFormSubmissions($flexi),
-                new GridFieldConfig_FlexiFormSubmission()));
+                new GridFieldConfig_FlexiFormSubmission($flexi)));
 
         return parent::updateCMSFlexiTabs($fields, $flexi);
     }

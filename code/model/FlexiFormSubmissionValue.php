@@ -17,4 +17,9 @@ class FlexiFormSubmissionValue extends DataObject {
         'Name'
     );
 
+    public function ColumnValue(){
+        return (class_exists($this->FormFieldClass)) ?
+            singleton($this->FormFieldClass)->transformValue($this->Value) :
+            $this->Value;
+    }
 }

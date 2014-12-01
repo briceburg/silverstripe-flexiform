@@ -45,19 +45,35 @@ class FlexiFormSubmission extends DataObject
 
         foreach ($this->Values() as $value) {
 
-            $transformed_value = class_exists($value->FormFieldClass) ? singleton($value->FormFieldClass)->transformValue(
-                $value->Value) : $value->Value;
-
             $fields->addFieldToTab('Root.Main',
-                new ReadonlyField(sprintf('r%s', $value->ID), $value->Name, $transformed_value));
+                new ReadonlyField(sprintf('r%s', $value->ID), $value->Name, $value->ColumnValue()));
         }
 
         return $fields;
     }
 
+    // utility
+    //////////
     public function getSubmittedBy()
     {
         return ($this->MemberID) ? $this->Member()->getName() : 'Site Visitor';
+    }
+
+    public function relField($fieldName)
+    {
+        // check if fieldName is 'Values.<fieldname'
+        if (substr($fieldName, 0, 7) == 'Values.') {
+            if ($submission_value = FlexiFormSubmissionValue::get()->filter(
+                array(
+                    'SubmissionID' => $this->ID,
+                    'Name' => substr($fieldName, 7)
+                ))->first()) {
+
+                return $submission_value->ColumnValue();
+            }
+        }
+
+        return parent::relField($fieldName);
     }
 }
 
