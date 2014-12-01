@@ -138,7 +138,12 @@ class FlexiFormExtension extends DataExtension
      */
     public function getFlexiFormFrontEndFields()
     {
-        return new FieldList($this->owner->FlexiFormFields()->toArray());
+        $fields = new FieldList();
+        foreach ($this->owner->FlexiFormFields() as $flexi_field) {
+            $title = (empty($flexi_field->Prompt)) ? $flexi_field->Name : $flexi_field->Prompt;
+            $fields->push($flexi_field->getFormField($title, $flexi_field->DefaultValue));
+        }
+        return $fields;
     }
 
     // Getters & Setters

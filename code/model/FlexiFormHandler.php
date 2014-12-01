@@ -13,8 +13,15 @@ class FlexiFormHandler extends DataObject
     private static $db = array(
         'HandlerName' => 'Varchar',
         'Description' => 'Varchar(255)',
-        'Readonly' => 'Boolean'
+        'Readonly' => 'Boolean',
+        'SubmitButtonText' => 'Varchar'
     );
+
+    public function populateDefaults(){
+        $this->SubmitButtonText = 'Submit';
+
+        return parent::populateDefaults();
+    }
 
     public function canDelete($member = null)
     {
@@ -48,7 +55,10 @@ class FlexiFormHandler extends DataObject
     }
 
     public function updateCMSFlexiTabs(TabSet $fields, $form)
-    {}
+    {
+        $field = new TextField('SubmitButtonText');
+        $fields->insertAfter($field, 'HandlerSettings');
+    }
 
     protected function onSubmit()
     {}

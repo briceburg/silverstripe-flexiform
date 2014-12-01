@@ -76,12 +76,17 @@ class FlexiFormField extends DataObject
     }
 
     // override this method for custom behavior
-    public function getFormField($name, $value = null)
+    public function getFormField($title = null, $value = null)
     {
         $field_class = $this->field_class;
-        $field = new $field_class($name);
 
-        if ($value !== null) {
+        if(!$title) {
+            $title = $this->getName();
+        }
+
+        $field = new $field_class($this->SafeName(), $title);
+
+        if($value) {
             $field->setValue($value);
         }
 
@@ -96,6 +101,10 @@ class FlexiFormField extends DataObject
     public function Description()
     {
         return $this->field_description;
+    }
+
+    public function SafeName(){
+        return sprintf('%s_%s',$this->ClassName,$this->ID);
     }
 
     public function OptionsPreview()
