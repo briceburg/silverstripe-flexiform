@@ -67,6 +67,16 @@ class FlexiFormHandler extends DataObject
         $fields->insertAfter($field, 'HandlerSettings');
     }
 
+    public function getFrontEndFormValidator($flexi, $front_end_fields){
+
+        $validator = new RequiredFields();
+        foreach($flexi->FlexiFormFields()->filter('Required',true) as $field) {
+            $validator->addRequiredField($field->SafeName());
+        }
+
+        return $validator;
+    }
+
     protected function onSubmit()
     {}
 

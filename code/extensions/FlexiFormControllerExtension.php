@@ -19,8 +19,9 @@ class FlexiFormControllerExtension extends Extension
 
         $fields = $flexi->getFlexiFormFrontEndFields();
         $actions = new FieldList(FormAction::create('FlexiFormPost')->setTitle($handler->SubmitButtonText));
+        $validator = $handler->getFrontEndFormValidator($flexi, $fields);
 
-        $form = new Form($this->owner, "FlexiForm", $fields, $actions);
+        $form = new Form($this->owner, "FlexiForm", $fields, $actions, $validator);
         $form->setFormMethod('POST', true);
         $form->loadDataFrom($this->owner->getRequest()->postVars());
 
@@ -35,9 +36,8 @@ class FlexiFormControllerExtension extends Extension
             return $this->owner->httpError(403, 'FlexiForm is not availabe on my dataRecord');
         }
 
+        return $this->owner->redirectBack();
 
-
-        die();
     }
 
     // by default, we assume the flexi form is the controller's data record.
