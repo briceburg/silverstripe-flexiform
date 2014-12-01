@@ -3,22 +3,21 @@ silverstripe-flexiforms
 
 Add CMS configurable forms to your SilverStripe objects. 
 
-**Work in progress. Pre-Release. Field Management is pretty much in place, need to finish
-submission handling and frontend work.**
-
 Features
 --------
 
 * Add forms to DataObjects or Pages
 * GridField based management of fields, options, submissions, actions, &c.
   * 100% compatible with [holder pages](https://github.com/briceburg/silverstripe-holderpage) & VersionedGridfield
-* Extensible Field Types (`FlexiFormField`) and Forms (`FlexiForm`)
-  * Programmatically define initial fields added to newly created forms
-  * Limit allowed field types per form
+* Extensible Fields (`FlexiFormField`), Handlers (`FlexiFormHandler`), and Forms (`FlexiFormExtension`)
+* Programmatically define initial fields and handlers + build them from the Environment Builder
 * **Many-many** relation between Form and Fields - reduced repetitiveness and improved consistency
   * _extraFields_ allows per-form customization without disturbing other forms using the same field
-* Programatically create fields in the Environment Builder (during /dev/build)  
  
+
+**Pre-Release Status** - Field managment + submissions are in place. Still tuning & documenting.
+For now, **be the source, be the source Danny**. Comments / PRs welcome!
+
 
 Requirements
 ============
@@ -30,7 +29,7 @@ Tested in SilverStripe 3.1
 Usage 
 =====
 
-Add configurable forms to your DataObjects and Pages by extending them with the
+* Add configurable forms to your DataObjects and Pages by extending them with the
 `FlexiFormExtension` DataExtension.  E.g.
 
 ```php
@@ -46,18 +45,44 @@ class Event extends DataObject
 Trigger the environment builder (/dev/build) after extending objects --
 You will now see the Form tab when editing Event in the CMS.
 
-To display forms on the Front-End, update your templates. Here's an example
-Event.ss
+* To display forms on the Front-End, add **$FlexiForm** to your template. 
+Here's a sample Event.ss;
 
 ```html
-
-Coming Soon...
-
+<div class="width-30">
+    <% include SectionNav %>
+</div>
+  
+  
+<div class="width-70">
+  <% if not FlexiFormPosted %>
+    $Content
+  <% end_if %>
+   
+  $FlexiForm    
+</div>
 ```
 
-You may, as always, override the [built-in templates](https://github.com/briceburg/silverstripe-flexiaddress/tree/master/templates) by
-adding them to your theme.
+FlexiForm extends ContentController out-of-box to make forms work. 
+The _FlexiForm_ method returns a standard SilverStripe `Form`, and the _FlexiFormPosted_ method
+returns true if the FlexiForm has been **successfully** posted. 
 
+* To change the form template, do so in your controller. E.g.
+
+```php
+
+class FormPage_Controller extends Page_Controller {
+  public function MyFlexiForm() {
+    $form = $this->FlexiForm();
+    $form->setTemplate('MyFormTemplate');
+    return $form;    
+  }
+}
+
+// and modify MyFormTemplate.ss in your themedir accordingly...
+```
+
+and use **$MyFlexiForm** in your template instead.
 
 
 Configuration
