@@ -34,6 +34,10 @@ class FlexiFormField extends DataObject
         'FieldName' => 'Name'
     );
 
+    private static $default_sort = array(
+        'SortOrder'
+    );
+
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
@@ -75,8 +79,17 @@ class FlexiFormField extends DataObject
         return $result;
     }
 
-    // override this method for custom behavior
-    public function getFormField($title = null, $value = null)
+    /*
+     * Get the field used in the front end. A great hook for customizing
+     * validation and attributes. Always use SafeName method for field name.
+     *
+     * @param string $title requested title / "prompt"
+     * @param string $value requested
+     * @param boolean $required if field is required for submission
+     * @return FormField
+     */
+
+    public function getFormField($title = null, $value = null, $required = false)
     {
         $field_class = $this->field_class;
 
@@ -88,6 +101,11 @@ class FlexiFormField extends DataObject
 
         if($value) {
             $field->setValue($value);
+        }
+
+        if($required){
+            // add html5 required attribute
+            $field->setAttribute('required',true);
         }
 
         return $field;
