@@ -17,7 +17,8 @@ class FlexiFormHandler extends DataObject
         'SubmitButtonText' => 'Varchar'
     );
 
-    public function populateDefaults(){
+    public function populateDefaults()
+    {
         $this->SubmitButtonText = 'Submit';
 
         return parent::populateDefaults();
@@ -56,7 +57,13 @@ class FlexiFormHandler extends DataObject
 
     public function updateCMSFlexiTabs(TabSet $fields, $form)
     {
-        $field = new TextField('SubmitButtonText');
+        $field = new HiddenField('FlexiFormHandlerSettings', 'FlexiFormHandlerSettings', true);
+        $fields->insertAfter($field, 'HandlerSettings');
+
+        // FlexiFormHandlerSetting[<fieldname>] hack to allow editing handler
+        //  from form gridfield, perhaps use gridfieldaddons editor instead?
+
+        $field = new TextField('FlexiFormHandlerSetting[SubmitButtonText]', 'Submit Button Text',$this->SubmitButtonText);
         $fields->insertAfter($field, 'HandlerSettings');
     }
 

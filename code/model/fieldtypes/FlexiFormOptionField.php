@@ -3,7 +3,7 @@
 class FlexiFormOptionField extends FlexiFormField
 {
 
-    function getCMSFields()
+    public function getCMSFields()
     {
         $fields = parent::getCMSFields();
 

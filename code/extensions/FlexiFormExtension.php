@@ -218,6 +218,20 @@ class FlexiFormExtension extends DataExtension
         return $this->owner->set_stat('flexiform_default_handler_name', $name);
     }
 
+
+    // hack to allow editing handler from form gridfield,
+    //   perhaps use gridfieldaddons linline editor instead?
+    public function setFlexiFormHandlerSettings($value)
+    {
+        if ($settings = Controller::curr()->getRequest()->requestVar('FlexiFormHandlerSetting')) {
+
+            $handler = $this->owner->FlexiFormHandler();
+            foreach (array_intersect_key($settings, $handler->db()) as $property => $value) {
+                $handler->$property = $value;
+            }
+            $handler->write();
+        }
+    }
     // Utility Methods
     //////////////////
     private function lookup($lookup, $do_not_merge = false)
