@@ -40,14 +40,11 @@ class FlexiFormSubmission extends DataObject
                 new ReadonlyField('SubmittedBy', 'Submitted By'),
                 new ReadonlyField('IPAddress', 'IP Address'),
                 new ReadonlyField('Created', 'Time Submitted'),
-                new HeaderField('Responses')
+                $field = new GridField('Values', 'Responses', $this->Values(),
+                    new GridFieldConfig_FlexiFormSubmissionValues())
             ));
 
-        foreach ($this->Values() as $value) {
-
-            $fields->addFieldToTab('Root.Main',
-                new ReadonlyField(sprintf('r%s', $value->ID), $value->Name, $value->ColumnValue()));
-        }
+        $field->addExtraClass('flexiform');
 
         return $fields;
     }

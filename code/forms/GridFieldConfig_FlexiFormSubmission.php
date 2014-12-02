@@ -9,7 +9,7 @@ class GridFieldConfig_FlexiFormSubmission extends GridFieldConfig
         $this->addComponent($sort = new GridFieldSortableHeader());
         $this->addComponent($filter = new GridFieldFilterHeader());
         $this->addComponent(new GridFieldDataColumns());
-        $this->addComponent(new GridFieldViewButton());
+        $this->addComponent(new GridFieldEditButton());
         $this->addComponent(new GridFieldDeleteAction(false));
         $this->addComponent(new GridFieldDetailForm());
         $this->addComponent($export = new GridFieldExportButton());
