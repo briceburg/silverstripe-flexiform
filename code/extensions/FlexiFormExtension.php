@@ -70,6 +70,9 @@ class FlexiFormExtension extends DataExtension
             return;
         }
 
+        $fields->removeByName('FlexiFormFields');
+        $fields->removeByName('FlexiFormHandlerID');
+
         if ($this->owner->exists()) {
 
             $fields_tab = new Tab('Fields');
@@ -275,7 +278,7 @@ class FlexiFormExtension extends DataExtension
                 }
             }
 
-            if ($this->owner->exists() && ! $this->owner->FlexiFormHandler()->exists()) {
+            if ($this->owner->exists() && ! $this->owner->FlexiFormHandlerID) {
                 $result->error("Please select a valid Form Handler");
             }
         }
@@ -312,7 +315,7 @@ class FlexiFormExtension extends DataExtension
         }
 
         // add the handler mapping
-        if ($this->owner->exists()) {
+        if ($this->owner->exists() && $this->owner->FlexiFormHandler()->exists()) {
             FlexiFormHandlerMapping::addMapping($this->owner->FlexiFormHandler(), $this->owner);
         }
 
