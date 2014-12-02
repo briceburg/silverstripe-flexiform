@@ -3,6 +3,7 @@
 class FlexiFormControllerExtension extends Extension
 {
     protected $session_posted_key = 'flexiform_posted';
+    protected $flexiform_object = null;
 
     private static $allowed_actions = array(
         'FlexiForm'
@@ -50,11 +51,15 @@ class FlexiFormControllerExtension extends Extension
     // by default, we assume the flexi form is the controller's data record.
     //  if it is another object, override to provide it.
     public function getFlexiFormObject() {
-        $flexi = $this->owner->data();
+        $flexi = ($this->flexiform_object) ?: $this->owner->data();
 
         if (! $flexi->hasExtension('FlexiFormExtension')) {
             throw new Exception('FlexiForm is not availabe on my dataRecord');
         }
         return $flexi;
+    }
+
+    public function setFlexiFormObject($flexi) {
+        return $this->flexiform_object = $flexi;
     }
 }
