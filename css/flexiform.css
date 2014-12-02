@@ -1,8 +1,10 @@
  
  #Form_ItemEditForm_FlexiForm table.ss-gridfield-table th.col-Name,
- #Form_ItemEditForm_FlexiForm table.ss-gridfield-table td.col-Name { width: 12em;}
+ #Form_ItemEditForm_FlexiForm table.ss-gridfield-table td.col-Name { min-width: 7em; }
  
+ #Form_ItemEditForm_FlexiForm table.ss-gridfield-table th.col-Prompt,
+ #Form_ItemEditForm_FlexiForm table.ss-gridfield-table td.col-Prompt { min-width: 10em;}
 
  #Form_ItemEditForm_FlexiForm table.ss-gridfield-table th.col-DefaultValue,
- #Form_ItemEditForm_FlexiForm table.ss-gridfield-table td.col-DefaultValue { width: 16em;}
+ #Form_ItemEditForm_FlexiForm table.ss-gridfield-table td.col-DefaultValue { max-width: 14em; min-width: 7em;}
  

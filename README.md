@@ -23,11 +23,20 @@ Comments / PRs welcome!
 
 
 Requirements
-============
+------------
 
 The venerable GridFieldExtensions https://github.com/ajshort/silverstripe-gridfieldextensions
 
 Tested in SilverStripe 3.1
+
+Screenshots
+-----------
+
+![flexiform fields](https://github.com/briceburg/silverstripe-flexiform/blob/master/docs/screenshots/flexiform_1.jpg?raw=true)
+
+![field editing](https://github.com/briceburg/silverstripe-flexiform/blob/master/docs/screenshots/flexiform_2.jpg?raw=true)
+
+
 
 Usage 
 =====
@@ -301,12 +310,16 @@ share a FieldName providing they're of a different type.
 
 First, create your Custom Field with a valid **$field_definitions** property.
 ```php
-class FlexiAuthorField extends FlexiFormOptionField
+<?php
+class FlexiAuthorField extends FlexiFormDropdownField
 {
-  protected $required_field_definition = array(
+  protected $field_description = 'Author Preference Dropdown';
+  protected $field_label = 'Author';
+
+  private static $required_field_definitions = array(
     array(
       'Name' => 'Author',
-      'EmptyString' => 'Select your favorite Author',
+      'EmptyString' => 'Other',
       'Options' => array(
         'Balzac' => 'Honoré de Balzac',
         'Dumas' => 'Alexandre Dumas',
@@ -322,17 +335,17 @@ class FlexiAuthorField extends FlexiFormOptionField
 ```
 
 
-* Strategy 2: Using [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration), **This is especially useful for creating fields from built-in field types**
+* Strategy 2: Using [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration), **especially useful for creating fields from built-in field types**
 
 ```yaml
 ---
 FlexiFormTextField:
-  required_field_definition: 
+  required_field_definitions: 
     - { Name: FirstName }
     - { Name: LastName }
     
 FlexiFormDropdownField:
-  required_field_definition:
+  required_field_definitions:
     - { Name: Preference, Options: { Eastern: Abacus, Western: Calculator } }
 ``` 
 
@@ -357,7 +370,7 @@ normal fields as follows;
 * **Readonly field names must be unique, regardless of underlying field type**
 
 ```php
-class FlexiAuthorField extends FlexiFormOptionField
+class FlexiAuthorField extends FlexiFormDropdownField
 {
   protected $required_field_definitions = array(
     array(
