@@ -11,7 +11,7 @@ class FlexiFormControllerExtension extends Extension
 
     public function FlexiForm()
     {
-        $flexi = $this->getFlexiFormObject();
+        $flexi = $this->owner->getFlexiFormObject();
         $handler = $flexi->FlexiFormHandler();
 
         if($this->FlexiFormPosted()) {
@@ -34,7 +34,7 @@ class FlexiFormControllerExtension extends Extension
 
     public function FlexiFormPost($data, $form)
     {
-        $flexi = $this->getFlexiFormObject();
+        $flexi = $this->owner->getFlexiFormObject();
         $handler = $flexi->FlexiFormHandler();
 
         if($handler->onSubmit($data, $form, $flexi)) {
