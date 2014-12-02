@@ -42,19 +42,35 @@ class FlexiFormOptionField extends FlexiFormField
         return $result;
     }
 
+    // template
+    ///////////
     public function OptionsPreview($limit = 24)
     {
         $field = DBField::create_field('Text', implode(', ', $this->Options()->column('Value')));
         return $field->LimitCharacters($limit);
     }
 
+    // utility
+    //////////
+    public function getFormField($title = null, $value = null, $required = false)
+    {
+        $field = parent::getFormField($title, $value, $required);
+
+        $field->setSource($this->Options()
+            ->map('Value', 'Value')
+            ->toArray());
+
+        return $field;
+    }
+
     public function getDefaultValueFormField($field_name = 'FieldDefaultValue')
     {
         $field = new DropdownField($field_name, 'Default Value', array());
         if ($this->Options()->exists()) {
-            $field->setSource($this->Options()
-                ->map('Value', 'Value')
-                ->toArray());
+            $field->setSource(
+                $this->Options()
+                    ->map('Value', 'Value')
+                    ->toArray());
         }
         $field->setEmptyString('None (Displays Empty String)');
 

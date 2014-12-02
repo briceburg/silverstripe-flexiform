@@ -1,8 +1,12 @@
 <?php
 
-class FlexiFormDropdownField extends FlexiFormOptionField {
+class FlexiFormDropdownField extends FlexiFormOptionField
+{
+
     protected $field_class = 'DropdownField';
+
     protected $field_label = 'Dropdown';
+
     protected $field_description = 'Displays supplied options to choose one from.';
 
     protected $default_empty_string = 'Please Choose';
@@ -20,10 +24,20 @@ class FlexiFormDropdownField extends FlexiFormOptionField {
         return $fields;
     }
 
+    public function getFormField($title = null, $value = null, $required = false)
+    {
+        $field = parent::getFormField($title, $value, $required);
 
-    public function getEmptyString(){
+        if (! $this->DefaultValue) {
+            $field->setEmptyString($this->getEmptyString());
+        }
+
+        return $field;
+    }
+
+    public function getEmptyString()
+    {
         $value = $this->getField('EmptyString');
         return (empty($value)) ? $this->default_empty_string : $value;
     }
-
 }
