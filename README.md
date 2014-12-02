@@ -74,6 +74,10 @@ You will now see the Form tab when editing Event in the CMS.
 </div>
 ```
 
+* Alternately, you can use the **[FlexiForm]** [shortcode](http://doc.silverstripe.org/framework/en/reference/shortcodes)
+in your Content area. This is especially useful for controlling the placement of 
+a the form inside a user configurable content block.
+
 FlexiForm extends ContentController out-of-box to make forms work. 
 The _FlexiForm_ method returns a standard SilverStripe `Form`, and the _FlexiFormPosted_ method
 returns true if the FlexiForm has been **successfully** posted. 
