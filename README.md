@@ -32,9 +32,9 @@ Tested in SilverStripe 3.1
 Screenshots
 -----------
 
-![flexiform fields](https://github.com/briceburg/silverstripe-flexiform/blob/master/docs/screenshots/flexiform_1.jpg?raw=true)
+![flexiform fields](https://github.com/briceburg/silverstripe-flexiform/blob/master/docs/screenshots/flexiform_1.png?raw=true)
 
-![field editing](https://github.com/briceburg/silverstripe-flexiform/blob/master/docs/screenshots/flexiform_2.jpg?raw=true)
+![field editing](https://github.com/briceburg/silverstripe-flexiform/blob/master/docs/screenshots/flexiform_2.png?raw=true)
 
 
 
