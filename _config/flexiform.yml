@@ -5,7 +5,7 @@ name: flexiform
 ContentController:
   extensions:
     - FlexiFormControllerExtension
-
+ 
 FlexiFormBasicHandler:
   required_handler_definitions:
     - { Name: Default, Readonly: true } 

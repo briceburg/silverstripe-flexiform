@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * FlexiFormExtension add CMS configurable forms to your objects.
+ */
 class FlexiFormExtension extends DataExtension
 {
 
@@ -138,20 +141,14 @@ class FlexiFormExtension extends DataExtension
         }
     }
 
-    /**
-     * Get the FieldList for this form
-     *
-     * @return FieldList
-     */
-    public function getFlexiFormFrontEndFields()
-    {
-        $fields = new FieldList();
-        foreach ($this->owner->FlexiFormFields()->sort('SortOrder') as $flexi_field) {
-            $title = (empty($flexi_field->Prompt)) ? $flexi_field->getName() : $flexi_field->Prompt;
-            $fields->push($flexi_field->getFormField($title, $flexi_field->DefaultValue, $flexi_field->Required));
-        }
-        return $fields;
+
+    // Templates
+    ////////////
+
+    public function getFlexiFormNickname(){
+        return $this->owner->ID;
     }
+
 
     // Getters & Setters
     ////////////////////
@@ -239,17 +236,35 @@ class FlexiFormExtension extends DataExtension
             $handler->write();
         }
     }
-    // Utility Methods
-    //////////////////
+
     private function lookup($lookup, $do_not_merge = false)
     {
         if ($do_not_merge &&
-             $unmerged = Config::inst()->get($this->owner->class, $lookup, Config::EXCLUDE_EXTRA_SOURCES)) {
-            return $unmerged;
-        }
+            $unmerged = Config::inst()->get($this->owner->class, $lookup, Config::EXCLUDE_EXTRA_SOURCES)) {
+                return $unmerged;
+            }
 
-        return $this->owner->stat($lookup);
+            return $this->owner->stat($lookup);
     }
+
+    // Utility Methods
+    //////////////////
+
+    /**
+     * Get the FieldList for this form
+     *
+     * @return FieldList
+     */
+    public function getFlexiFormFrontEndFields()
+    {
+        $fields = new FieldList();
+        foreach ($this->owner->FlexiFormFields()->sort('SortOrder') as $flexi_field) {
+            $title = (empty($flexi_field->Prompt)) ? $flexi_field->getName() : $flexi_field->Prompt;
+            $fields->push($flexi_field->getFormField($title, $flexi_field->DefaultValue, $flexi_field->Required));
+        }
+        return $fields;
+    }
+
 
     public function validate(ValidationResult $result)
     {
