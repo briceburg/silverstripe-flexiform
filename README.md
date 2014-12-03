@@ -345,9 +345,21 @@ class FlexiAuthorField extends FlexiFormDropdownField
 ---
 FlexiFormTextField:
   required_field_definitions: 
-    - { Name: FirstName }
-    - { Name: LastName }
+    - Name: FirstName
+    - Name: LastName 
     
+FlexiFormDropdownField: 
+  required_field_definitions: 
+    - Name: Author
+      Options: 
+        Balzac: Honoré de Balzac
+        Dumas: Alexandre Dumas
+        Flaubert: Gustave Flaubert
+        Hugo: Victor Hugo
+        Verne: Jules Verne
+        Voltaire: Voltaire
+
+# Alt Syntax    
 FlexiFormDropdownField:
   required_field_definitions:
     - { Name: Preference, Options: { Eastern: Abacus, Western: Calculator } }
@@ -390,5 +402,6 @@ or
 ---
 FlexiAuthorField:
   required_field_definitions: 
-    - { Name: Author, Readonly: true }
+    - Name: Author
+      Readonly: true
 ```
