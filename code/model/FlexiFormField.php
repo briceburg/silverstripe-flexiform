@@ -3,6 +3,9 @@
 class FlexiFormField extends DataObject
 {
 
+    // @TODO make these static
+    // @TODO use required_records for consistency
+    // @TODO use Title for consistency?
     protected $field_class = 'FormField';
 
     protected $field_label = 'Override Me';
@@ -43,6 +46,11 @@ class FlexiFormField extends DataObject
         'FieldName'
     );
 
+    public function canDelete($member = null)
+    {
+        return ($this->Readonly) ? false : parent::canDelete($member);
+    }
+
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
@@ -75,10 +83,14 @@ class FlexiFormField extends DataObject
     {
         $result = parent::validate();
 
-        if ($result->valid()) {
-            if (empty($this->FieldName)) {
-                $result->error('Name cannot be blank');
-            }
+        if (empty($this->FieldName)) {
+            $result->error("Name is required.");
+        } elseif ($obj = DataObject::get($this->class)->filter(
+            array(
+                'FieldName' => $this->FieldName,
+                'ID:not' => $this->ID
+            ))->first()) {
+            $result->error("A {$obj->Label()} is already titled {$this->FieldName}.");
         }
 
         return $result;
@@ -146,7 +158,8 @@ class FlexiFormField extends DataObject
         return '-';
     }
 
-    public function transformValue($value) {
+    public function transformValue($value)
+    {
         return $value;
     }
 

@@ -2,13 +2,26 @@
 
 class FlexiFormBasicHandler extends FlexiFormHandler
 {
-
     protected $handler_label = 'Basic Handler';
 
     protected $handler_description = 'Submissions are stored. Presents a thank you message.';
 
+    private static $db = array(
+        'SuccessMessage' => 'HTMLText'
+    );
+
+
     public function updateCMSFlexiTabs(TabSet $fields, $flexi)
     {
+        parent::updateCMSFlexiTabs($fields, $flexi);
+
+        // Settings
+        ///////////
+        $field = new HtmlEditorField('FlexiFormHandlerSetting[SuccessMessage]', 'Success Message',
+            $this->SuccessMessage);
+        $fields->insertAfter($field, 'FlexiFormHandlerSettings');
+
+
         // Submissions
         //////////////
         $submissions_tab = new Tab('Submissions');
@@ -18,7 +31,6 @@ class FlexiFormBasicHandler extends FlexiFormHandler
             new GridField('FlexiFormSubmissions', 'Submissions', $this->getFormSubmissions($flexi),
                 new GridFieldConfig_FlexiFormSubmission($flexi)));
 
-        return parent::updateCMSFlexiTabs($fields, $flexi);
     }
 
     public function getFormSubmissions($flexi)
@@ -43,7 +55,7 @@ class FlexiFormBasicHandler extends FlexiFormHandler
 
     public function onSuccess($flexi)
     {
-        return 'Die Guy';
+        return $this->SuccessMessage;
     }
 
     // Utility Methods

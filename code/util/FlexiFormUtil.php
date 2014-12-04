@@ -16,6 +16,26 @@ class FlexiFormUtil
         Requirements::css($moduleDir . '/css/flexiform.css');
     }
 
+    public static function GetFlexiByIdentifier($identifier){
+        foreach(self::GetFlexiFormClasses() as $className) {
+            if($flexi = DataObject::get($className)->filter('FlexiFormIdentifier',$identifier)->first()) {
+                return $flexi;
+            }
+        }
+    }
+
+    public static function GetFlexiFormClasses(){
+        // @todo more efficient manner for finding classes extended by _extension_ ?
+
+        $classes = array();
+        foreach(SS_ClassLoader::instance()->getManifest()->getDescendantsOf('DataObject') as $className) {
+            if(Object::has_extension($className,'FlexiFormExtension')) {
+                $classes[] = $className;
+            }
+        }
+        return $classes;
+    }
+
     public static function CreateFlexiField($className, $definition)
     {
         if (! isset($definition['Name']) || empty($definition['Name'])) {
