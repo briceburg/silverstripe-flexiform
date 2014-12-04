@@ -2,19 +2,11 @@
 
 class FlexiForm extends Form
 {
+    private static $flexiform_post_action = 'FlexiFormPost';
 
-    private static $url_handlers = array(
-        'post//$ID/$OtherID' => 'post'
-    );
-
-    private static $allowed_actions = array(
-        'post'
-    );
-
-    private static $flexiform_post_action = 'post';
-
-    public function __construct($controller, $name, FieldList $fields, FieldList $actions, $validator = null)
+    public function __construct(Controller $controller, $name, FieldList $fields, FieldList $actions, $validator = null)
     {
+
         parent::__construct($controller, $name, $fields, $actions, $validator);
 
         $this->enableSecurityToken();
@@ -26,39 +18,37 @@ class FlexiForm extends Form
         $this->setFlexiFormOrigin();
     }
 
-    public function post($request)
-    {
-        // TODO: do not allow double posts (e.g. refresh being clicked)
-
-        $action = $request->getVar('flexiform_origin');
-        $token = $request->getVar('flexiform_token');
-
-        if (! $this->checkAccessAction($action) || $token != $this->getSecurityToken()->getValue()) {
-            //return $this->httpError(403, "Unauthorized Origin.");
-            // unauthorized origin, quitely redirect back
-            return $this->controller->redirectBack();
+    protected function handleAction($request, $action) {
+        if($action != 'httpSubmission' && $flexi = FlexiFormUtil::GetFlexiByIdentifier($action)) {
+            $action = 'httpSubmission';
         }
-        $this->controller->setFlexiFormPosted(true);
-        return $this->controller->handleAction($request, $action);
+
+        return parent::handleAction($request, $action);
     }
 
-    public function getPostLink($flexi, $handler)
-    {
-        return $this->controller->join_links($this->controller->Link($this->controller->getAction()),
-            $this->stat('flexiform_post_action'), $flexi->getFlexiFormNickname(),
-            '?flexiform_origin=' . $this->getFlexiFormOrigin(), '?flexiform_token=' . $this->getSecurityToken()->getValue());
+    public function hasAction($action) {
+        return ($action != 'httpSubmission' && FlexiFormUtil::GetFlexiByIdentifier($action)) ? true : parent::hasAction($action);
     }
 
-    protected function setFlexiFormOrigin()
+
+    public function checkAccessAction($action) {
+        return ($action != 'httpSubmission' && FlexiFormUtil::GetFlexiByIdentifier($action)) ? true : parent::checkAccessAction($action);
+    }
+
+
+    public function setFlexiFormOrigin()
     {
+        // @TODO can we use a mock the result of a mock request for a URL instead?
         // @TODO: Mask origin in session / token since we're using session anyways via SecurityToken...?
         if (! $this->Fields()->fieldByName('flexiform_origin')) {
             $this->Fields()->push($origin = new HiddenField('flexiform_origin'));
+
+            // @TODO store URL params for mock request as well
             $origin->setValue($this->controller->getAction());
         }
     }
 
-    protected function getFlexiFormOrigin()
+    public function getFlexiFormOrigin()
     {
         if (! $field = $this->Fields()->fieldByName('flexiform_origin')) {
             return 'index';
@@ -66,4 +56,28 @@ class FlexiForm extends Form
 
         return $field->Value();
     }
+
+
+    public function renderFlexiFormOrigin(){
+        $action = $this->getFlexiFormOrigin();
+
+        // @TODO set origin requestvars
+        //$origin_request = new SS_HTTPRequest('GET', $origin_url);
+        if ($this->controller->checkAccessAction($action)) {
+
+            // routine taken from controller handleAction,
+            //  we cannot call b/c it's protected
+
+
+            if($this->controller->hasMethod($action)) {
+                $result = $this->controller->$action($request);
+                return (is_array($result)) ? $this->controller->getViewer($action)->process($this->controller->customise($result)) : $result;
+            }
+
+            return $this->controller->getViewer($action)->process($this->controller);
+        }
+
+    }
+
+
 }

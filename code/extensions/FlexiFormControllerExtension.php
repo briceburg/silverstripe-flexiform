@@ -1,59 +1,88 @@
 <?php
 
+// @TODO security token handling
+// @TODO form clearing to prevent resubmissions
+// @TODO use referer vs setting origin??
 class FlexiFormControllerExtension extends Extension
 {
 
     protected $flexiform_object = null;
 
-    protected $flexiform_posted = false;
+    protected $flexiform_is_posted = false;
 
     private static $allowed_actions = array(
-        'FlexiForm'
+        'FlexiFormPost'
     );
 
-    public function FlexiForm()
+    public function FlexiForm($identifier = null)
     {
-        $flexi = $this->owner->getFlexiFormObject();
+        $flexi = $this->owner->getFlexiFormObject($identifier);
         $handler = $flexi->FlexiFormHandler();
 
+        $fields = $flexi->getFlexiFormFrontEndFields();
+        $actions = new FieldList(
+            FormAction::create('FlexiFormPostHandler')->setTitle($handler->SubmitButtonText));
+        $validator = $handler->getFrontEndFormValidator($flexi);
+
+        $form_class = $flexi->stat('flexiform_form_class');
+        $form_name = Config::inst()->get($form_class, 'flexiform_post_action');
+        $form = new $form_class($this->owner, $form_name, $fields, $actions, $validator);
+
+        // identify the form in post
+        $form->setFormAction(
+            Controller::join_links($this->owner->Link(), $form_name, $flexi->FlexiFormIdentifier));
+
+        // if the form is successfull and the onSuccess handler returns
+        //  a non boolean value, return its value. else return  the form.
         if ($this->FlexiFormPosted() && $success = $handler->onSuccess($flexi)) {
             if (! is_bool($success)) {
                 return $success;
             }
         }
 
-        $fields = $flexi->getFlexiFormFrontEndFields();
-        $actions = new FieldList(FormAction::create('FlexiFormPost')->setTitle($handler->SubmitButtonText));
-        $validator = $handler->getFrontEndFormValidator($flexi);
-
-        return new FlexiForm($this->owner, "FlexiForm", $fields, $actions, $validator);
+        return $form;
     }
 
-    public function FlexiFormPost($data, $form)
+    public function FlexiFormPost($request)
     {
-        $flexi = $this->owner->getFlexiFormObject();
+        return $this->FlexiForm($request->param('ID'));
+    }
+
+    public function FlexiFormPostHandler($data, $form, $request)
+    {
+        $flexi = $this->owner->getFlexiFormObject($request->param('ID'));
         $handler = $flexi->FlexiFormHandler();
 
         if ($handler->onSubmit($data, $form, $flexi)) {
-            $this->owner->redirect($form->getPostLink($flexi, $handler));
+            $this->flexiform_is_posted = true;
+
+            // render the orgin action
+            if($result = $form->renderFlexiFormOrigin()) {
+                return $result;
+            }
         }
 
-        return $this->owner->redirectBack();
+        // else, form is not valid (handler onSubmit returned falsey)
+        $this->owner->redirectBack();
     }
 
     public function FlexiFormPosted()
     {
-        return $this->flexiform_posted;
+        return $this->flexiform_is_posted;
     }
 
-    // by default, we assume the flexi form is the controller's data record.
-    //  if it is another object, override to provide it.
-    public function getFlexiFormObject()
+    public function getFlexiFormObject($identifier = null)
     {
+        // by default, we assume the flexi form is the controller's data record.
+        // You may provide an identifier or override as neccessary.
         $flexi = ($this->flexiform_object) ?  : $this->owner->data();
 
+        if ($identifier && ! $flexi = FlexiFormUtil::GetFlexiByIdentifier($identifier)) {
+            throw new Exception("No Flexi with identifier `$identifier` found");
+        }
+
         if (! $flexi->hasExtension('FlexiFormExtension')) {
-            throw new Exception('FlexiForm is not availabe on my dataRecord');
+            throw new Exception('Flexi Form not found. Try passing an Identifier, or setting.');
         }
         return $flexi;
     }
@@ -61,10 +90,5 @@ class FlexiFormControllerExtension extends Extension
     public function setFlexiFormObject($flexi)
     {
         return $this->flexiform_object = $flexi;
-    }
-
-    public function setFlexiFormPosted($boolean)
-    {
-        $this->flexiform_posted = $boolean;
     }
 }

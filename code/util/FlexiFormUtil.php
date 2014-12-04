@@ -5,6 +5,8 @@
  */
 class FlexiFormUtil
 {
+    protected static $identifier_cache = array();
+
     public static function get_module_dir()
     {
         return basename(dirname(dirname(__DIR__)));
@@ -17,8 +19,13 @@ class FlexiFormUtil
     }
 
     public static function GetFlexiByIdentifier($identifier){
+        if(isset(self::$identifier_cache[$identifier])) {
+            return self::$identifier_cache[$identifier];
+        }
+
         foreach(self::GetFlexiFormClasses() as $className) {
             if($flexi = DataObject::get($className)->filter('FlexiFormIdentifier',$identifier)->first()) {
+                self::$identifier_cache[$identifier] = $flexi;
                 return $flexi;
             }
         }
