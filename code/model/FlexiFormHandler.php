@@ -66,7 +66,7 @@ class FlexiFormHandler extends DataObject
 
         $field = new TextField('FlexiFormHandlerSetting[SubmitButtonText]', 'Submit Button Text',
             $this->SubmitButtonText);
-        $fields->insertAfter($field, 'HandlerSettings');
+        $fields->insertBefore($field, 'FlexiFormHandlerSettings');
     }
 
     public function getFrontEndFormValidator($flexi)
