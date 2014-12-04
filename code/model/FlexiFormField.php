@@ -3,7 +3,9 @@
 class FlexiFormField extends DataObject
 {
 
-    // @TODO make these static?
+    // @TODO make these static
+    // @TODO use required_records for consistency
+    // @TODO use Title for consistency?
     protected $field_class = 'FormField';
 
     protected $field_label = 'Override Me';

@@ -1,5 +1,5 @@
 <?php
-
+//@TODO Validate Identifier / force aphanumeric_
 class FlexiFormExtension extends DataExtension
 {
 
@@ -14,6 +14,8 @@ class FlexiFormExtension extends DataExtension
     private static $flexiform_insertBefore = null;
 
     private static $flexiform_addButton = 'Create New Field';
+
+    private static $flexiform_form_class = 'FlexiForm';
 
     /**
      * Specify allowed FlexiFormField Types for this form. Empty to allow all.
@@ -30,9 +32,14 @@ class FlexiFormExtension extends DataExtension
 
     /**
      * The name of the default handler for this form. See flexiform.yml
+     * @TODO ?
      * @var String
      */
     private static $flexiform_default_handler_name = 'Default';
+
+    private static $db = array(
+        'FlexiFormIdentifier' => 'Varchar'
+    );
 
     private static $has_one = array(
         'FlexiFormHandler' => 'FlexiFormHandler'
@@ -85,7 +92,8 @@ class FlexiFormExtension extends DataExtension
             // Fields
             /////////
 
-            if($allowed_types = $this->getFlexiFormFieldTypes()) {
+
+            if ($allowed_types = $this->getFlexiFormFieldTypes()) {
                 $singleton = singleton('FlexiFormField');
                 $singleton->setAllowedFieldTypes($allowed_types);
             }
@@ -100,6 +108,8 @@ class FlexiFormExtension extends DataExtension
             // Settings
             ///////////
 
+
+            $settings_tab->push(new TextField('FlexiFormIdentifier', 'Form Identifier'));
 
             $singleton = singleton('FlexiFormHandler');
             $singleton->set_stat('selected_handler_id', $this->owner->FlexiFormHandlerID);
@@ -148,7 +158,8 @@ class FlexiFormExtension extends DataExtension
         $fields = new FieldList();
         foreach ($this->owner->FlexiFormFields()->sort('SortOrder') as $flexi_field) {
             $title = (empty($flexi_field->Prompt)) ? $flexi_field->getName() : $flexi_field->Prompt;
-            $fields->push($flexi_field->getFormField($title, $flexi_field->DefaultValue, $flexi_field->Required));
+            $fields->push(
+                $flexi_field->getFormField($title, $flexi_field->DefaultValue, $flexi_field->Required));
         }
         return $fields;
     }
@@ -225,7 +236,6 @@ class FlexiFormExtension extends DataExtension
         return $this->owner->set_stat('flexiform_default_handler_name', $name);
     }
 
-
     // hack to allow editing handler from form gridfield,
     //   perhaps use gridfieldaddons linline editor instead?
     public function setFlexiFormHandlerSettings($value)
@@ -264,7 +274,7 @@ class FlexiFormExtension extends DataExtension
 
                 if (in_array($field->Name, $names)) {
                     $result->error(
-                        "Field Names must be unique per form. {$field->Name} was encountered twice.");
+                        "Field Names must be unique per form. {$field->Name} was encountered more than once.");
                     break;
                 } else {
                     $names[] = $field->Name;
@@ -280,6 +290,14 @@ class FlexiFormExtension extends DataExtension
 
             if ($this->owner->exists() && ! $this->owner->FlexiFormHandlerID) {
                 $result->error("Please select a valid Form Handler");
+            }
+
+            if ($this->owner->exists() && empty($this->owner->FlexiFormIdentifier)) {
+                $result->error('Form Identifier Setting is Required.');
+            } elseif ($flexi = FlexiFormUtil::GetFlexiByIdentifier($this->owner->FlexiFormIdentifier)) {
+                if ($flexi->ID != $this->owner->ID) {
+                    $result->error('Form Identifier is used by another form.');
+                }
             }
         }
     }
@@ -319,8 +337,18 @@ class FlexiFormExtension extends DataExtension
             FlexiFormHandlerMapping::addMapping($this->owner->FlexiFormHandler(), $this->owner);
         }
 
+        // seed the identifier
+        // @TODO perhaps base on title of extended object??
+        if (empty($this->owner->FlexiFormIdentifier)) {
+            $this->owner->FlexiFormIdentifier = "{$this->owner->class}_{$this->owner->ID}";
+            $this->owner->write();
+        }
+
         return parent::onAfterWrite();
     }
+
+    public function onBeforeWrite()
+    {}
 
     public function onBeforeDelete()
     {
