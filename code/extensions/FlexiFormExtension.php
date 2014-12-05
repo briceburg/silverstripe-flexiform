@@ -288,13 +288,8 @@ class FlexiFormExtension extends DataExtension
                 }
             }
 
-            if ($this->owner->exists() && ! $this->owner->FlexiFormHandlerID) {
-                $result->error("Please select a valid Form Handler");
-            }
-
-            if ($this->owner->exists() && empty($this->owner->FlexiFormIdentifier)) {
-                $result->error('Form Identifier Setting is Required.');
-            } elseif ($flexi = FlexiFormUtil::GetFlexiByIdentifier($this->owner->FlexiFormIdentifier)) {
+            if ($this->owner->FlexiFormIdentifier &&
+                 $flexi = FlexiFormUtil::GetFlexiByIdentifier($this->owner->FlexiFormIdentifier)) {
                 if ($flexi->ID != $this->owner->ID) {
                     $result->error('Form Identifier is used by another form.');
                 }

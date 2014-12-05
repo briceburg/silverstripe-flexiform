@@ -2,8 +2,6 @@
 
 class FlexiFormField extends DataObject
 {
-
-    // @TODO make these static
     // @TODO use required_records for consistency
     // @TODO use Title for consistency?
     private static $field_class = 'FormField';
