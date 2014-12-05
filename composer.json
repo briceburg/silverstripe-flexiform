@@ -1,6 +1,6 @@
 {
 	"name": "briceburg/silverstripe-flexiform",
-	"description": "Add CMS configurable forms to your SilverStripe objects. ",
+	"description": "Add CMS configurable forms to your SilverStripe objects.",
 	"type": "silverstripe-module",
 	"homepage": "https://github.com/briceburg/silverstripe-flexiform",
 	"keywords": ["silverstripe", "form", "userforms", "gridfield", "flexi", "form fields", "sortable", "manage", "cms"],
@@ -17,6 +17,9 @@
 	"require": {
     "silverstripe/framework": "~3.0",
     "silverstripe-australia/gridfieldextensions": "*"
+  },
+  "suggest": {
+    "briceburg/silverstripe-flexifields": "Useful additional fields for flexiform and beyond."
   },
 	"extra": {
 		"installer-name": "flexiform",
