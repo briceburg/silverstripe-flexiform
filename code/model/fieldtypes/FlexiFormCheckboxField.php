@@ -3,11 +3,11 @@
 class FlexiFormCheckboxField extends FlexiFormField
 {
 
-    protected $field_class = 'CheckboxField';
+    private static $field_class = 'CheckboxField';
 
-    protected $field_label = 'Checkbox';
+    private static $field_label = 'Checkbox Field';
 
-    protected $field_description = 'Displays a checkbox field. Yes/No Value.';
+    private static $field_description = 'Displays a checkbox field. Yes/No Value.';
 
     public function getCMSFields()
     {

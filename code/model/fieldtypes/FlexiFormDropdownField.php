@@ -3,11 +3,11 @@
 class FlexiFormDropdownField extends FlexiFormOptionField
 {
 
-    protected $field_class = 'DropdownField';
+    private static $field_class = 'DropdownField';
 
-    protected $field_label = 'Dropdown';
+    private static $field_label = 'Dropdown Field';
 
-    protected $field_description = 'Displays supplied options to choose one from.';
+    private static $field_description = 'Displays supplied options to choose one from.';
 
     protected $default_empty_string = 'Please Choose';
 

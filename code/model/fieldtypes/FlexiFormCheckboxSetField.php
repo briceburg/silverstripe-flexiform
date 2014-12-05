@@ -1,8 +1,8 @@
 <?php
 
 class FlexiFormCheckboxSetField extends FlexiFormOptionField {
-    protected $field_class = 'CheckboxSetField';
-    protected $field_label = 'Checkbox Set';
-    protected $field_description = 'Displays supplied options to choose one or more from.';
+    private static $field_class = 'CheckboxSetField';
+    private static $field_label = 'Checkbox Set Field';
+    private static $field_description = 'Displays supplied options to choose one or more from.';
 
 }

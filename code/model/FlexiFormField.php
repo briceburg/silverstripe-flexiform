@@ -6,11 +6,11 @@ class FlexiFormField extends DataObject
     // @TODO make these static
     // @TODO use required_records for consistency
     // @TODO use Title for consistency?
-    protected $field_class = 'FormField';
+    private static $field_class = 'FormField';
 
-    protected $field_label = 'Override Me';
+    private static $field_label = 'Form Field';
 
-    protected $field_description = 'Override Me';
+    private static $field_description = 'A description of this field.';
 
     // used to automatically generate fields during /dev/build
     private static $required_field_definitions = array();
@@ -69,7 +69,7 @@ class FlexiFormField extends DataObject
         $field->description = 'Optional. Will prepopulate the field with this value.';
 
         $field = new LiteralField('Description',
-            "<strong>{$this->field_label} Field &mdash;</strong> {$this->field_description} <hr />");
+            "<strong>{$this->Label()}&mdash;</strong> {$this->Description()} <hr />");
         $fields->addFieldToTab('Root.Main', $field, 'FieldName');
 
         if ($this->Readonly) {
@@ -118,13 +118,10 @@ class FlexiFormField extends DataObject
      */
     public function getFormField($title = null, $value = null, $required = false)
     {
-        $field_class = $this->field_class;
+        $field_class = $this->stat('field_class');
+        $field_title = ($title) ?: $this->getName();
 
-        if (! $title) {
-            $title = $this->getName();
-        }
-
-        $field = new $field_class($this->SafeName(), $title);
+        $field = new $field_class($this->SafeName(), $field_title);
 
         if ($value) {
             $field->setValue($value);
@@ -140,12 +137,12 @@ class FlexiFormField extends DataObject
 
     public function Label()
     {
-        return $this->field_label;
+        return $this->stat('field_label');
     }
 
     public function Description()
     {
-        return $this->field_description;
+        return $this->stat('field_description');
     }
 
     public function SafeName()
@@ -166,7 +163,7 @@ class FlexiFormField extends DataObject
     public function getTitle()
     {
         $readonly = ($this->Readonly) ? '*' : '';
-        return "{$this->FieldName} ({$this->field_label})$readonly";
+        return "{$this->FieldName} ({$this->Label()})$readonly";
     }
 
     public function getDefaultValue()
