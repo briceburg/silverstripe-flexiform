@@ -62,9 +62,17 @@ class FlexiFormField extends DataObject
         $field->setMaxLength(16);
         $field->description = 'Shown in submissions. Should be short and without special characters.';
 
+
+        if($this->hasMethod('getDefaultValueFormField')) {
+            $fields->replaceField('FieldDefaultValue', $this->getDefaultValueFormField());
+        }
+
         $field = $fields->dataFieldByName('FieldDefaultValue');
         $field->setTitle('Default Value');
         $field->description = 'Optional. Will prepopulate the field with this value.';
+
+
+
 
         $field = new LiteralField('Description',
             "<strong>{$this->Label()}&mdash;</strong> {$this->Description()} <hr />");
@@ -209,7 +217,7 @@ class FlexiFormField extends DataObject
                 continue;
             }
             $class = singleton($className);
-            $classes[$className] = "{$class->Label()} Field";
+            $classes[$className] = "{$class->Label()}";
         }
 
         return $classes;

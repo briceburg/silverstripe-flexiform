@@ -12,8 +12,6 @@ class FlexiFormOptionField extends FlexiFormField
                 new ReadonlyField('ReadonlyOptions', 'Options', $this->OptionsPreview(999)));
         } else {
 
-            $fields->replaceField('FieldDefaultValue', $this->getDefaultValueFormField());
-
             $config = new GridFieldConfig_FlexiFormOption();
 
             $fields->addFieldToTab('Root.Main', new GridField('Options', 'Options', $this->Options(), $config));
