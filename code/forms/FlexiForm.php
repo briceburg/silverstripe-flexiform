@@ -56,28 +56,4 @@ class FlexiForm extends Form
 
         return $field->Value();
     }
-
-
-    public function renderFlexiFormOrigin(){
-        $action = $this->getFlexiFormOrigin();
-
-        // @TODO set origin requestvars
-        //$origin_request = new SS_HTTPRequest('GET', $origin_url);
-        if ($this->controller->checkAccessAction($action)) {
-
-            // routine taken from controller handleAction,
-            //  we cannot call b/c it's protected
-
-
-            if($this->controller->hasMethod($action)) {
-                $result = $this->controller->$action($request);
-                return (is_array($result)) ? $this->controller->getViewer($action)->process($this->controller->customise($result)) : $result;
-            }
-
-            return $this->controller->getViewer($action)->process($this->controller);
-        }
-
-    }
-
-
 }

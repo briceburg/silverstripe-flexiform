@@ -56,9 +56,10 @@ class FlexiFormControllerExtension extends Extension
         if ($handler->onSubmit($data, $form, $flexi)) {
             $this->flexiform_is_posted = true;
 
-            // render the orgin action
-            if($result = $form->renderFlexiFormOrigin()) {
-                return $result;
+            $action = $form->getFlexiFormOrigin();
+
+            if ($this->owner->checkAccessAction($action)) {
+                return $this->owner->getViewer($action)->process($this->owner);
             }
         }
 
