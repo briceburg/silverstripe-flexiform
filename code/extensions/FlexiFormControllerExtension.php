@@ -34,7 +34,7 @@ class FlexiFormControllerExtension extends Extension
 
         // if the form is successfull and the onSuccess handler returns
         //  a non boolean value, return its value. else return  the form.
-        if ($this->FlexiFormPosted() && $success = $handler->onSuccess($flexi)) {
+        if ($this->FlexiFormPosted() && $success = $handler->onSuccess($form, $flexi)) {
             if (! is_bool($success)) {
                 return $success;
             }
@@ -53,11 +53,13 @@ class FlexiFormControllerExtension extends Extension
         $flexi = $this->owner->getFlexiFormObject($request->param('ID'));
         $handler = $flexi->FlexiFormHandler();
 
-        if ($handler->onSubmit($data, $form, $flexi)) {
+        if ($handler->onSubmit($data, $form, $request, $flexi)) {
             $this->flexiform_is_posted = true;
 
-            $action = $form->getFlexiFormOrigin();
+            $token = $form->getSecurityToken();
 
+
+            $action = $form->getFlexiFormOrigin();
             if ($this->owner->checkAccessAction($action)) {
                 return $this->owner->getViewer($action)->process($this->owner);
             }

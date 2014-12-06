@@ -44,7 +44,7 @@ class FlexiFormBasicHandler extends FlexiFormHandler
 
     // Submission Handling
     //////////////////////
-    public function onSubmit($data, $form, $flexi)
+    public function onSubmit($data, $form, $request, $flexi)
     {
         // persist the submission
         $this->saveSubmission($data, $flexi);
@@ -53,7 +53,7 @@ class FlexiFormBasicHandler extends FlexiFormHandler
         return true;
     }
 
-    public function onSuccess($flexi)
+    public function onSuccess($form, $flexi)
     {
         return $this->SuccessMessage;
     }

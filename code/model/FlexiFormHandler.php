@@ -87,12 +87,13 @@ class FlexiFormHandler extends DataObject
      * Returning false will stop the form from processing. It's a good idea to
      * add an errorMessage to the form if you do this.
      *
-     * @param Array $data
-     * @param Form $form
+     * @param Array $data Form Submission Data
+     * @param FlexiForm $form Form Object
+     * @param SS_HTTPRequest Request Object
      * @param DataObject $flexi The object extended by FlexiFormExtension
      * @return Boolean
      */
-    public function onSubmit($data, $form, $flexi)
+    public function onSubmit(Array $data, FlexiForm $form, SS_HTTPRequest $request, DataObject $flexi)
     {
         return true;
     }
@@ -104,11 +105,10 @@ class FlexiFormHandler extends DataObject
      * If this function returns a value, the return value will be passed to
      * the template instead of the form. E.g. Display a "Thank You" Message.
      *
-     * @param Array $data
-     * @param Form $form
+     * @param FlexiForm $form Form Object
      * @param DataObject $flexi The object extended by FlexiFormExtension
      */
-    public function onSuccess($flexi)
+    public function onSuccess(FlexiForm $form, DataObject $flexi)
     {}
 
     // Templates
