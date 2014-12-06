@@ -23,6 +23,8 @@ Requirements
 
 The venerable GridFieldExtensions https://github.com/ajshort/silverstripe-gridfieldextensions
 
+_OPTIONAL_ : Additonal fields from FlexiFields https://github.com/briceburg/silverstripe-flexifields
+
 Tested in SilverStripe 3.1
 
 Screenshots
@@ -96,21 +98,17 @@ _server logs_ and _analytics_.
 ### Shortcodes
 
 Alternately, you can use the **[flexiform]** [shortcode](http://doc.silverstripe.org/framework/en/reference/shortcodes)
-in your Content area. This is especially useful for controlling placement of 
-a form inside user configurable content.
+in content areas. This is especially useful for controlling placement of 
+a form inside existing content.
 
-Shortcodes support Form Identifiers -- very helpful when adding forms related objects. E.g. 
+Optionally pass a _Form Identifier_ through the ID paramater. 
 
 ```
 Some WYSIWYG Content
 
-Default Form:
+Default Form: <br /> [FlexiForm]
 
-[FlexiForm]
-
-Explicit Form:
-
-[flexiform id=registration_form]
+Explicit Form: <br /> [flexiform id=registration_form]
 
 ```
 
@@ -134,9 +132,11 @@ class Event extends DataObject
 
 }
 
+// attempts to use EventForm.ss by default, falling back to Form.ss 
 class EventForm extends FlexiForm {
-    // optional: getTemplate will return 'EventForm' by default
-    // public function getTemplate() { ... } 
+    
+    // optional: provide a specific template
+    // public function getTemplate() { return 'EventSpecificTemplate'; } 
 }
 
 ```
