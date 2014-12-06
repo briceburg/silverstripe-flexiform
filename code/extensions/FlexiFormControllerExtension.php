@@ -56,8 +56,8 @@ class FlexiFormControllerExtension extends Extension
         if ($handler->onSubmit($data, $form, $request, $flexi)) {
             $this->flexiform_is_posted = true;
 
-            $token = $form->getSecurityToken();
-
+            // mark submitted, reset token to prevent re-submissions
+            $form->markSubmitted();
 
             $action = $form->getFlexiFormOrigin();
             if ($this->owner->checkAccessAction($action)) {
