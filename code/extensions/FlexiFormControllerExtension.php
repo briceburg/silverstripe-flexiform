@@ -1,14 +1,11 @@
 <?php
 
-// @TODO security token handling
-// @TODO form clearing to prevent resubmissions
-// @TODO use referer vs setting origin??
 class FlexiFormControllerExtension extends Extension
 {
 
     protected $flexiform_object = null;
 
-    protected $flexiform_is_posted = false;
+    protected $flexiform_posted = false;
 
     private static $allowed_actions = array(
         'FlexiFormPost'
@@ -34,7 +31,7 @@ class FlexiFormControllerExtension extends Extension
 
         // if the form is successfull and the onSuccess handler returns
         //  a non boolean value, return its value. else return  the form.
-        if ($this->FlexiFormPosted() && $success = $handler->onSuccess($form, $flexi)) {
+        if ($this->FlexiFormPosted($flexi->FlexiFormIdentifier) && $success = $handler->onSuccess($form, $flexi)) {
             if (! is_bool($success)) {
                 return $success;
             }
@@ -54,7 +51,7 @@ class FlexiFormControllerExtension extends Extension
         $handler = $flexi->FlexiFormHandler();
 
         if ($handler->onSubmit($data, $form, $request, $flexi)) {
-            $this->flexiform_is_posted = true;
+            $this->flexiform_posted = $flexi->FlexiFormIdentifier;
 
             // mark submitted, reset token to prevent re-submissions
             $form->markSubmitted();
@@ -69,9 +66,9 @@ class FlexiFormControllerExtension extends Extension
         $this->owner->redirectBack();
     }
 
-    public function FlexiFormPosted()
+    public function FlexiFormPosted($identifier = null)
     {
-        return $this->flexiform_is_posted;
+        return ($identifier) ? ($this->flexiform_posted == $identifier) : (bool) $this->flexiform_posted;
     }
 
     public function getFlexiFormObject($identifier = null)
