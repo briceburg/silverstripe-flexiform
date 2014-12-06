@@ -48,22 +48,16 @@ class FlexiForm extends Form
     {
         // @TODO can we use a mock the result of a mock request for a URL instead?
         //   ..Needed in case action requires URL params to display form.
-        // @TODO: Mask origin in session / token since we're using session anyways via SecurityToken...?
-        if (! $this->Fields()->fieldByName('flexiform_origin')) {
-            $this->Fields()->push($origin = new HiddenField('flexiform_origin'));
-
-            // @TODO store URL params for mock request as well
-            $origin->setValue($this->controller->getAction());
+        $action = $this->controller->getAction();
+        if($action != $this->stat('flexiform_post_action')) {
+            Session::set("FormInfo.{$this->FormName()}.flexi_origin", $action);
         }
     }
 
     public function getFlexiFormOrigin()
     {
-        if (! $field = $this->Fields()->fieldByName('flexiform_origin')) {
-            return 'index';
-        }
-
-        return $field->Value();
+        $action = Session::get("FormInfo.{$this->FormName()}.flexi_origin");
+        return ($action) ?: 'index';
     }
 
     // allow customization of CSRF/Re-submission messages
