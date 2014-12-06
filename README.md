@@ -6,20 +6,16 @@ Add CMS configurable forms to your SilverStripe objects.
 Features
 --------
 
-* Add forms to DataObjects or Pages
+* Add forms to any DataObject or Page
 * GridField based management of fields, options, submissions, actions, &c.
   * 100% compatible with [holder pages](https://github.com/briceburg/silverstripe-holderpage) & VersionedGridfield
 * Programmatically define initial fields and handlers + build them from the Environment Builder
 * **Many-many** between Form and `FlexiFormField`, **has_many** between `FlexiFormHandler`
   * reduced repetitiveness and improved consistency
   * _extraFields_ allows per-form customization without disturbing other forms using the same field
- 
-
-**Pre-Release Status** - Field managment + submissions are in place. Still tuning & documenting.
-
-For now, **be the source, be the source Danny**. 
-
-Comments / PRs welcome!
+* Protection against form re-submissions
+* Definable, friendly post URLs for logs and analytics
+* Support for multiple forms per page 
 
 
 Requirements
@@ -41,8 +37,7 @@ Screenshots
 Usage 
 =====
 
-* Add configurable forms to your DataObjects and Pages by extending them with the
-`FlexiFormExtension` DataExtension.  E.g.
+* Add forms to DataObjects and Pages by extending them `FlexiFormExtension`. E.g.
 
 ```php
 class Event extends DataObject
@@ -54,18 +49,15 @@ class Event extends DataObject
 
 }
 ```
+
 Trigger the environment builder (/dev/build) after extending objects --
 You will now see the Form tab when editing Event in the CMS.
 
 * To display flexiforms, add **$FlexiForm** to your template. Here's a sample Event.ss;
 
+
 ```html
-<div class="width-30">
-    <% include SectionNav %>
-</div>
-  
-  
-<div class="width-70">
+<div class="event-content">
   <% if not FlexiFormPosted %>
     $Content
   <% end_if %>
@@ -74,27 +66,81 @@ You will now see the Form tab when editing Event in the CMS.
 </div>
 ```
 
-* Alternately, you can use the **[FlexiForm]** [shortcode](http://doc.silverstripe.org/framework/en/reference/shortcodes)
+Here we use **$FlexiFormPosted** to hide Page's content if a form has been posted.
+
+
+### Form Identifiers
+
+
+Use Form Identifiers when you have **multiple forms on a page**, or need to 
+**reference a form from another page or object**. 
+
+By default, flexiform expects the current controller's _dataRecord_ to reference
+an object extended by `FlexiFormExtension`. You can explicitly set the flexiform
+object via the **setFlexiFormObject** of your controller,  or by passing 
+an _Identifer_ to **$FlexiForm**.
+
+Form Identifiers are found and set through the  _Settings_ tab on flexiforms. The
+identifier is used in the submission post-URL to easily track from submissions
+through your _server logs_ and _analytics_.
+
+```
+```html
+<!-- .ss template -->
+
+<div class="page-content">
+  $FlexiForm('newsletter_form')    
+</div>
+```
+
+
+### Shortcodes
+
+Alternately, you can use the **[flexiform]** [shortcode](http://doc.silverstripe.org/framework/en/reference/shortcodes)
 in your Content area. This is especially useful for controlling the placement of 
 a the form inside a user configurable content block.
 
-FlexiForm extends ContentController out-of-box to make forms work. 
-The _FlexiForm_ method returns a standard SilverStripe `Form`, and the _FlexiFormPosted_ method
-returns true if the FlexiForm has been **successfully** posted. 
+Shortcodes support Form Identifiers, which is very helpful when adding forms
+related objects. E.g. 
 
-* To change the form template, do so in your controller. E.g.
+```
+Some WYSIWYG Content
+
+Default Form:
+
+[FlexiForm]
+
+Explicit Form:
+
+[flexiform id=registration_form]
+
+```
+
+
+### Templates, Custom Form Classes
+
+By default, flexiform uses Form.ss to render the form. You can change the template by
+
+* Simple Means: Adding a **FlexiForm.ss** to your theme
+
+* Powerful Means: Provide an alternate form class via **$flexiform_form_class** 
 
 ```php
+class Event extends DataObject
+{
+    private static $extensions = array(
+        'FlexiFormExtension'
+    );
+    
+    private static $flexi_form_class = 'EventForm';
 
-class FormPage_Controller extends Page_Controller {
-  public function MyFlexiForm() {
-    $form = $this->FlexiForm();
-    $form->setTemplate('MyFormTemplate');
-    return $form;    
-  }
 }
 
-// and modify MyFormTemplate.ss in your themedir accordingly...
+class EventForm extends FlexiForm {
+    // optional: getTemplate will return 'EventForm' by default
+    // public function getTemplate() { ... } 
+}
+
 ```
 
 Configuration
