@@ -3,14 +3,18 @@
 $flexiform_cb = function($params, $content, $parser, $tag, $info){
     $controller = Controller::curr();
 
-    // did we pass a specific method name for fethcing the flexi object?
-    //   e.g. [FlexiForm]myMethod[/FlexiForm]
-    if(!empty($content) && method_exists($controller, $content)) {
-        $flexi = $controller->$content();
-        $controller->setFlexiFormObject($flexi);
+    $identifier = null;
+
+    foreach($params as $param => $value) {
+        switch (strtolower($param)) {
+            case 'id':
+            case 'identifier':
+                $identifier = $value;
+                break;
+        }
     }
 
-    $content = $controller->FlexiForm();
+    $content = $controller->FlexiForm($identifier);
     return (is_string($content)) ? $content : $content->forTemplate();
 };
 
