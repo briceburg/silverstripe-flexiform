@@ -5,11 +5,7 @@ class FlexiFormOptionField extends FlexiFormField
     public function canCreate($member = null)
     {
         // allow creation of descendents, not this class itself.
-<<<<<<< HEAD
         return ($this->class === __CLASS__) ? false : parent::canCreate($member);
-=======
-        return ($this->class === __CLASS__) ? false : parent::canDelete($member);
->>>>>>> branch 'master' of git@github.com:briceburg/silverstripe-flexiform.git
     }
 
 

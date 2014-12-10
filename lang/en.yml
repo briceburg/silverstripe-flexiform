@@ -1,3 +1,7 @@
 en:
+
+  FlexiFormBasicHandler:
+    DEFAULT_SUCCESS_MESSAGE: Thank you. XX
+    
   FlexiForm:
-    RESUBMISSION_MESSAGE: Your submission was received.  
+    RESUBMISSION_MESSAGE: Your submission was received.

@@ -92,17 +92,11 @@ class FlexiFormExtension extends DataExtension
             // Fields
             /////////
             $field_types = array();
-<<<<<<< HEAD
             foreach ($this->getFlexiFormFieldTypes() as $className) {
                 $singleton = singleton($className);
                 if($singleton->canCreate(Member::currentUser())) {
                     $field_types[$className] = "{$singleton->Label()}";
                 }
-=======
-            foreach($this->getFlexiFormFieldTypes() as $className){
-                $singleton = singleton($className);
-                $field_types[$className] = "{$singleton->Label()}";
->>>>>>> branch 'master' of git@github.com:briceburg/silverstripe-flexiform.git
             }
 
             $config = new GridFieldConfig_FlexiForm();
@@ -110,11 +104,8 @@ class FlexiFormExtension extends DataExtension
             $component->setTitle($this->getFlexiFormAddButton());
             $component->setClasses($field_types);
 
-<<<<<<< HEAD
             // hint allowed types to FlexiFormField search fields
             singleton('FlexiFormField')->set_stat('allowed_types',$field_types);
-=======
->>>>>>> branch 'master' of git@github.com:briceburg/silverstripe-flexiform.git
 
             $fields_tab->push(
                 new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config));

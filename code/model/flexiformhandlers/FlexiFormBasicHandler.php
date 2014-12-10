@@ -2,6 +2,7 @@
 
 class FlexiFormBasicHandler extends FlexiFormHandler
 {
+
     protected $handler_label = 'Basic Handler';
 
     protected $handler_description = 'Submissions are stored. Presents a thank you message.';
@@ -10,6 +11,10 @@ class FlexiFormBasicHandler extends FlexiFormHandler
         'SuccessMessage' => 'HTMLText'
     );
 
+    public function populateDefaults()
+    {
+        $this->SuccessMessage = '<p>' . _t("FlexiFormBasicHandler.DEFAULT_SUCCESS_MESSAGE", "Thank You.") . '</p>';
+    }
 
     public function updateCMSFlexiTabs(TabSet $fields, $flexi)
     {
@@ -21,7 +26,6 @@ class FlexiFormBasicHandler extends FlexiFormHandler
             $this->SuccessMessage);
         $fields->insertAfter($field, 'FlexiFormHandlerSettings');
 
-
         // Submissions
         //////////////
         $submissions_tab = new Tab('Submissions');
@@ -30,7 +34,6 @@ class FlexiFormBasicHandler extends FlexiFormHandler
         $submissions_tab->push(
             new GridField('FlexiFormSubmissions', 'Submissions', $this->getFormSubmissions($flexi),
                 new GridFieldConfig_FlexiFormSubmission($flexi)));
-
     }
 
     public function getFormSubmissions($flexi)
@@ -48,7 +51,6 @@ class FlexiFormBasicHandler extends FlexiFormHandler
     {
         // persist the submission
         $this->saveSubmission($data, $flexi);
-
 
         return true;
     }
