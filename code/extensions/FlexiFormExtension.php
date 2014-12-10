@@ -91,16 +91,17 @@ class FlexiFormExtension extends DataExtension
 
             // Fields
             /////////
-
-
-            if ($allowed_types = $this->getFlexiFormFieldTypes()) {
-                $singleton = singleton('FlexiFormField');
-                $singleton->setAllowedFieldTypes($allowed_types);
+            $field_types = array();
+            foreach($this->getFlexiFormFieldTypes() as $className){
+                $singleton = singleton($className);
+                $field_types[$className] = "{$singleton->Label()}";
             }
 
             $config = new GridFieldConfig_FlexiForm();
             $component = $config->getComponentByType('GridFieldAddNewMultiClass');
             $component->setTitle($this->getFlexiFormAddButton());
+            $component->setClasses($field_types);
+
 
             $fields_tab->push(
                 new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config));
@@ -208,7 +209,18 @@ class FlexiFormExtension extends DataExtension
 
     public function getFlexiFormFieldTypes()
     {
-        return $this->lookup('flexiform_field_types');
+        $field_types = $this->lookup('flexiform_field_types');
+
+        if (empty($field_types)) {
+            // allow all field types by default
+            $field_types = SS_ClassLoader::instance()->getManifest()->getDescendantsOf(
+                'FlexiFormField');
+
+            // remember for later...
+            $this->setFlexiFormFieldTypes($field_types);
+        }
+
+        return $field_types;
     }
 
     public function setFlexiFormFieldTypes(Array $field_types)

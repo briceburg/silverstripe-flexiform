@@ -16,12 +16,6 @@ class GridFieldConfig_FlexiForm extends GridFieldConfig
         $this->addComponent(new GridFieldDetailForm());
 
 
-        // Multi-Class Add Button
-        /////////////////////////
-
-        $component = $this->getComponentByType('GridFieldAddNewMultiClass');
-        $component->setClasses(singleton('FlexiFormField')->getAllowedFieldTypeClassNames());
-
         // Validation
         // ///////////
         $component = $this->getComponentByType('GridFieldDetailForm');

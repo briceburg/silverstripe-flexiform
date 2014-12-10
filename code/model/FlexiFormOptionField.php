@@ -2,6 +2,12 @@
 
 class FlexiFormOptionField extends FlexiFormField
 {
+    public function canCreate($member = null)
+    {
+        // allow creation of descendents, not this class itself.
+        return ($this->class === __CLASS__) ? false : parent::canDelete($member);
+    }
+
 
     public function getCMSFields()
     {
