@@ -237,9 +237,9 @@ class FlexiFormExtension extends DataExtension
         return $this->lookup('flexiform_initial_fields');
     }
 
-    public function setFlexiFormInitialFields(Array $field_types)
+    public function setFlexiFormInitialFields(Array $field_definitions)
     {
-        return $this->owner->set_stat('flexiform_initial_fields', $field_types);
+        return $this->owner->set_stat('flexiform_initial_fields', $field_definitions);
     }
 
     public function getFlexiFormDefaultHandlerName()
