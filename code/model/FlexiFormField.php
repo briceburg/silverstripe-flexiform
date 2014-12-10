@@ -102,7 +102,8 @@ class FlexiFormField extends DataObject
         } elseif ($obj = DataObject::get($this->class)->filter(
             array(
                 'FieldName' => $this->FieldName,
-                'ID:not' => $this->ID
+                'ID:not' => $this->ID,
+                'Readonly' => $this->Readonly
             ))->first()) {
             $result->error("A {$obj->Label()} is already titled {$this->FieldName}.");
         }
