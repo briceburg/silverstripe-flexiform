@@ -10,6 +10,9 @@ class FlexiFormField extends DataObject
 
     private static $field_description = 'A description of this field.';
 
+    // set to false to disallow/hide creation of this field on forms
+    private static $can_create = true;
+
     // used to automatically generate fields during /dev/build
     private static $required_field_definitions = array();
 
@@ -43,6 +46,11 @@ class FlexiFormField extends DataObject
     private static $default_sort = array(
         'FieldName'
     );
+
+    public function canCreate($member = null)
+    {
+        return ($this->stat('can_create') === false) ? false : parent::canCreate($member);
+    }
 
     public function canDelete($member = null)
     {
@@ -194,33 +202,6 @@ class FlexiFormField extends DataObject
     public function setRequiredFieldDefinitions(Array $required_field_definitions)
     {
         return $this->set_stat('required_field_definitions', $required_field_definitions);
-    }
-
-    public function getAllowedFieldTypes()
-    {
-        if (! $fields = $this->stat('allowed_field_types')) {
-            $fields = SS_ClassLoader::instance()->getManifest()->getDescendantsOf('FlexiFormField');
-        }
-        return $fields;
-    }
-
-    public function setAllowedFieldTypes($field_classnames)
-    {
-        return $this->set_stat('allowed_field_types', $field_classnames);
-    }
-
-    public function getAllowedFieldTypeClassNames()
-    {
-        $classes = array();
-        foreach ($this->getAllowedFieldTypes() as $className) {
-            if ($className == 'FlexiFormOptionField') {
-                continue;
-            }
-            $class = singleton($className);
-            $classes[$className] = "{$class->Label()}";
-        }
-
-        return $classes;
     }
 
     public function requireDefaultRecords()
