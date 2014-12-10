@@ -315,16 +315,14 @@ class FlexiFormExtension extends DataExtension
 
     public function onAfterWrite()
     {
+
         // if this is a newly created form, prepopulate fields
         if ($this->owner->isChanged('ID')) {
 
             $fields = $this->owner->FlexiFormFields();
-            foreach ($this->getFlexiFormInitialFields() as $field_type => $definition) {
-
-                if (is_string($definition)) {
-                    $definition = array(
-                        'Name' => $definition
-                    );
+            foreach ($this->getFlexiFormInitialFields() as $definition) {
+                if(!is_array($definition) || !isset($definition['Name']) || !isset($definition['Type'])) {
+                    throw new ValidationException('Initial Field Definitions must be an associative array, with at least Name and Type provided.');
                 }
 
                 // lookup field name, prioritizing Readonly fields
@@ -332,13 +330,18 @@ class FlexiFormExtension extends DataExtension
                     ->filter(
                     array(
                         'FieldName' => $definition['Name'],
-                        'ClassName' => $field_type
+                        'ClassName' => $definition['Type']
                     ))
                     ->first()) {
-                    $field = FlexiFormUtil::CreateFlexiField($field_type, $definition);
+                    $field = FlexiFormUtil::CreateFlexiField($definition['Type'], $definition);
                 }
 
-                $fields->add($field);
+                $extraFields = array();
+                foreach (array_intersect_key($definition, $fields->getExtraFields()) as $property => $value) {
+                    $extraFields[$property] = $value;
+                }
+
+                $fields->add($field,$extraFields);
             }
         }
 
