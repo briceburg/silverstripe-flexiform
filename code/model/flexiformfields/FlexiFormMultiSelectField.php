@@ -15,12 +15,14 @@ class FlexiFormMultiSelectField extends FlexiFormDropdownField
         'EmptyString' => 'Varchar'
     );
 
-
     public function getFormField($title = null, $value = null, $required = false)
     {
         $field = parent::getFormField($title, $value, $required);
 
         $field->setMultiple(true);
+        if (! $this->DefaultValue) {
+            $field->setHasEmptyDefault(false);
+        }
 
         return $field;
     }
