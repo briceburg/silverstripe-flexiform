@@ -119,15 +119,16 @@ class RegistrationForm extends DataObject {
  
 ### Automatically adding fields to a form
 
-Newly created forms can be programmatically initialized with fields. Fields
-are created on-the-fly, or existing fields can be referenced and reused. This
-greatly reduces administrative repetitiveness and improves consistency.
+Newly created forms can be programmatically initialized with a set of fields by
+providing Initial Field definitions. 
 
-* Field definitions are defined as map of _Arrays_, with the key representing Field Type.
-  * If the value is a string, the field with mating Name and Type will be reused.  
-  * If the value is an array, a field will be created from the array components.
-    * Name is required. 
-    * If supplying Options, use Value => Label.
+Initial Field definitions are nearly the same 
+as [Custom Fields](#Custom-Fields), except that you must provide a `Type` and property.
+Additionally, you may provide extra values (such as `Prompt`). 
+
+Flexiform will attempt to link the field of matching `Name` and `Type`. If
+no matching field is found, a new field will be created from the definiton and linked.
+
 
 * Strategy 1: Overload the **$flexiform_initial_fields** property
 
@@ -139,33 +140,22 @@ class AuthorChoiceForm extends DataObject {
   );
 
   private static $flexiform_initial_fields = array(
-      // link the existing FlexiFormEmailField with Name "Email"
-      'FlexiFormEmailField' => 'Email',
-
-      // create a new FlexiFormDropdownField to spec
-      'FlexiFormDropdownField' => array(
-          'Name' => 'Author',
-          'Type' => '',
-          'EmptyString' => 'Select your favorite Author',
-          'Options' => array(
-              'Balzac' => 'Honoré de Balzac',
-              'Dumas' => 'Alexandre Dumas',
-              'Flaubert' => 'Gustave Flaubert',
-              'Hugo' => 'Victor Hugo',
-              'Verne' => 'Jules Verne',
-              'Voltaire' => 'Voltaire')
+      array(
+          'Type' => 'FlexiFormTextField',
+          'Name' => 'Name',
+          'Prompt' => 'Your Name'
+      ),
+      array(
+          'Type' => 'FlexiFormEmailField',
+          'Name' => 'Email',
+          'Prompt' => 'Your Email'
       )
   );
 
 }
 ```
 
-* Strategy 2: Use the **setDefaultFlexiFields** setter method 
-
-
-_This example assumes that fields named FirstName, LastName, and Email 
-already exist. Perhaps by manually being created or better yet - created
-as a Readonly fields during /dev/build_
+* Strategy 2: Use the **setFlexiFormInitialFields** setter method 
 
 ```php
 class Event extends SiteTree {
@@ -179,11 +169,18 @@ class Event extends SiteTree {
       // make configuration changes _BEFORE_ calling parent getCMSFields...
       $this->setFlexiFormTab('Root.Registration');
       $this->setFlexiFormInitialFields(
-          array(
-              'FlexiFormTextField' => 'FirstName',
-              'FlexiFormTextField' => 'LastName',
-              'FlexiFormEmailField' => 'Email'
-          ));
+        array(
+            array(
+                'Type' => 'FlexiFormTextField',
+                'Name' => 'Name',
+                'Prompt' => 'Your Name'
+            ),
+            array(
+                'Type' => 'FlexiFormEmailField',
+                'Name' => 'Email',
+                'Prompt' => 'Your Email'
+            )
+        ));
       
       $fields = parent::getCMSFields();
       
@@ -192,6 +189,22 @@ class Event extends SiteTree {
 
 }
 ```
+
+* Strategy 3: Using [YAML Configuration](http://doc.silverstripe.org/framework/en/topics/configuration
+
+```yaml
+---
+Event:
+  flexiform_initial_fields:
+    - Name: Name
+      Type: FlexiFormTextField
+      Prompt: Your XX
+      
+    - Name: Email
+      Type: FlexiFormEmailField
+      Prompt: Your YY
+```
+
 
   
 Custom Fields
