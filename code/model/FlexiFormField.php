@@ -49,7 +49,11 @@ class FlexiFormField extends DataObject
 
     public function canCreate($member = null)
     {
+<<<<<<< HEAD
         return ($this->stat('can_create') === false) ? false : parent::canCreate($member);
+=======
+        return ($this->stat('can_create') === false) ? false : parent::canDelete($member);
+>>>>>>> branch 'master' of git@github.com:briceburg/silverstripe-flexiform.git
     }
 
     public function canDelete($member = null)
