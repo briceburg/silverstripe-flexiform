@@ -92,9 +92,11 @@ class FlexiFormExtension extends DataExtension
             // Fields
             /////////
             $field_types = array();
-            foreach($this->getFlexiFormFieldTypes() as $className){
+            foreach ($this->getFlexiFormFieldTypes() as $className) {
                 $singleton = singleton($className);
-                $field_types[$className] = "{$singleton->Label()}";
+                if($singleton->canCreate(Member::currentUser())) {
+                    $field_types[$className] = "{$singleton->Label()}";
+                }
             }
 
             $config = new GridFieldConfig_FlexiForm();
@@ -102,6 +104,8 @@ class FlexiFormExtension extends DataExtension
             $component->setTitle($this->getFlexiFormAddButton());
             $component->setClasses($field_types);
 
+            // hint allowed types to FlexiFormField search fields
+            singleton('FlexiFormField')->set_stat('allowed_types',$field_types);
 
             $fields_tab->push(
                 new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config));
@@ -318,21 +322,20 @@ class FlexiFormExtension extends DataExtension
             foreach ($this->getFlexiFormInitialFields() as $field_type => $definition) {
 
                 if (is_string($definition)) {
+                    $definition = array(
+                        'Name' => $definition
+                    );
+                }
 
-                    // lookup field name, prioritizing Readonly fields
-                    if (! $field = FlexiFormField::get()->sort('Readonly', 'DESC')
-                        ->filter(
-                        array(
-                            'FieldName' => $definition,
-                            'ClassName' => $field_type
-                        ))
-                        ->first()) {
-                        throw new ValidationException("No $field_type field found named `$definition`");
-                    }
-                } elseif (is_array($definition)) {
+                // lookup field name, prioritizing Readonly fields
+                if (! $field = FlexiFormField::get()->sort('Readonly', 'DESC')
+                    ->filter(
+                    array(
+                        'FieldName' => $definition['Name'],
+                        'ClassName' => $field_type
+                    ))
+                    ->first()) {
                     $field = FlexiFormUtil::CreateFlexiField($field_type, $definition);
-                } else {
-                    throw new ValidationException('Unknown Field Definition Encountered');
                 }
 
                 $fields->add($field);

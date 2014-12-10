@@ -114,10 +114,11 @@ class FlexiFormField extends DataObject
     {
         $fields = parent::scaffoldSearchFields($_params);
 
-        $field = $fields->dataFieldByName('ClassName');
-        $field->setSource($this->getAllowedFieldTypeClassNames());
-        $field->setEmptyString('Select Type');
-
+        if($allowed_types = $this->stat('allowed_types')) {
+             $field = $fields->dataFieldByName('ClassName');
+             $field->setSource($allowed_types);
+             $field->setEmptyString('Select Type');
+        }
         return $fields;
     }
 
