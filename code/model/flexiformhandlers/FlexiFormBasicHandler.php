@@ -13,7 +13,8 @@ class FlexiFormBasicHandler extends FlexiFormHandler
 
     public function populateDefaults()
     {
-        $this->SuccessMessage = '<p>' . _t("FlexiFormBasicHandler.DEFAULT_SUCCESS_MESSAGE", "Thank You.") . '</p>';
+        $this->SuccessMessage = '<p>' . _t("FlexiFormBasicHandler.DEFAULT_SUCCESS_MESSAGE", "Thank You.") .
+             '</p>';
     }
 
     public function updateCMSFlexiTabs(TabSet $fields, $flexi)
@@ -76,7 +77,7 @@ class FlexiFormBasicHandler extends FlexiFormHandler
                 $value->FormFieldID = $field->ID;
                 $value->FormFieldClass = $field->class;
                 $value->Name = $field->getName();
-                $value->Value = $data[$field->SafeName()];
+                $value->Value = (is_array($data[$field->SafeName()])) ? implode(",", $data[$field->SafeName()]) : $data[$field->SafeName()];
 
                 $values->add($value);
             }
