@@ -82,7 +82,7 @@ class FlexiFormHandler extends DataObject
         $form_settings = $flexi->FlexiFormConf('HandlerSettings');
         foreach(Config::inst()->get($this->class, 'handler_settings', Config::INHERITED) as $component => $class) {
 
-            if(!$setting = $flexi->FlexiFormConf("Setting.$component")) {
+            if(!$setting = $flexi->FlexiFormSetting($component)) {
                 $setting = new $class();
                 $setting->Setting = $component;
                 $setting->HandlerID = $this->ID;
@@ -90,6 +90,8 @@ class FlexiFormHandler extends DataObject
             }
 
             $field = $setting->getCMSField($component);
+
+            // field name: FlexiFormConfig[Setting][<handler_id>][<setting_name>]
             $field->setName("FlexiFormConfig[Setting][{$this->ID}][$component]");
             $settings_tab->push($field);
         }

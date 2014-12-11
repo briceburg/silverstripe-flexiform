@@ -32,4 +32,13 @@ class FlexiFormHandlerSetting extends DataObject
         return ($this->getField('Value')) ?: $this->Handler()->getField($this->Setting);
     }
 
+    public function forTemplate(){
+        return $this->CastedValue()->forTemplate();
+    }
+
+    public function __toString()
+    {
+        return $this->forTemplate();
+    }
+
 }
