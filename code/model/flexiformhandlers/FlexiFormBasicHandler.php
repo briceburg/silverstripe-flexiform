@@ -3,9 +3,13 @@
 class FlexiFormBasicHandler extends FlexiFormHandler
 {
 
-    protected $handler_label = 'Basic Handler';
+    private static $handler_label = 'Basic Handler';
 
-    protected $handler_description = 'Submissions are stored. Presents a thank you message.';
+    private static $handler_description = 'Submissions are stored. Presents a success you message upon completion.';
+
+    private static $handler_settings = array(
+        'SuccessMessage' => 'FlexiFormHTMLTextHandlerSetting'
+    );
 
     private static $db = array(
         'SuccessMessage' => 'HTMLText'
@@ -15,6 +19,19 @@ class FlexiFormBasicHandler extends FlexiFormHandler
     {
         $this->SuccessMessage = '<p>' . _t("FlexiFormBasicHandler.DEFAULT_SUCCESS_MESSAGE", "Thank You.") .
              '</p>';
+
+        return parent::populateDefaults();
+    }
+
+    public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        //$fields->addFieldToTab('Root.Main', new HtmlEditorField('SuccessMessage.Value','GGG'));
+
+
+
+        return $fields;
     }
 
     public function updateCMSFlexiTabs(TabSet $fields, $flexi)
@@ -23,9 +40,12 @@ class FlexiFormBasicHandler extends FlexiFormHandler
 
         // Settings
         ///////////
+
+        /*
         $field = new HtmlEditorField('FlexiFormHandlerSetting[SuccessMessage]', 'Success Message',
             $this->SuccessMessage);
         $fields->insertAfter($field, 'FlexiFormHandlerSettings');
+        */
 
         // Submissions
         //////////////

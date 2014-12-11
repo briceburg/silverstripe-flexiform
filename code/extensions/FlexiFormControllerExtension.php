@@ -45,6 +45,8 @@ class FlexiFormControllerExtension extends Extension
         return $this->FlexiForm($request->param('ID'));
     }
 
+    // @TODO must direct to success
+
     public function FlexiFormPostHandler($data, $form, $request)
     {
         $flexi = $this->owner->getFlexiFormObject($request->param('ID'));

@@ -94,7 +94,7 @@ class FlexiFormExtension extends DataExtension
             $field_types = array();
             foreach ($this->getFlexiFormFieldTypes() as $className) {
                 $singleton = singleton($className);
-                if($singleton->canCreate(Member::currentUser())) {
+                if ($singleton->canCreate(Member::currentUser())) {
                     $field_types[$className] = "{$singleton->Label()}";
                 }
             }
@@ -105,7 +105,7 @@ class FlexiFormExtension extends DataExtension
             $component->setClasses($field_types);
 
             // hint allowed types to FlexiFormField search fields
-            singleton('FlexiFormField')->set_stat('allowed_types',$field_types);
+            singleton('FlexiFormField')->set_stat('allowed_types', $field_types);
 
             $fields_tab->push(
                 new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config));
@@ -137,10 +137,13 @@ class FlexiFormExtension extends DataExtension
             $handler = $this->owner->FlexiFormHandler();
             if ($handler->exists()) {
 
+                /* @TODO port this to FlexiAddress, no longer needed here
                 $other_form_count = $handler->FormCount() - 1;
                 $plural = ($other_form_count > 1) ? 'forms' : 'form';
                 $description = ($other_form_count) ? "<em>Your changes will impact <strong>$other_form_count other $plural</strong>. If you would like your changes to impact only this form, create a new handler.</em>" : '';
-                $field = new LiteralField('HandlerSettings', "<h3>Handler Settings</h3>$description");
+                */
+
+                $field = new LiteralField('HandlerSettings', "<h3>Handler Settings</h3>");
 
                 $settings_tab->push($field);
 
@@ -313,6 +316,23 @@ class FlexiFormExtension extends DataExtension
         }
     }
 
+    public function getHandlerSettings()
+    {
+        return FlexiFormHandlerSetting::get()->filter(
+            array(
+                'FlexiFormID' => $this->ID,
+                'FlexiFormClass' => $this->class,
+                'HandlerID' => $this->FlexiFormHandlerID
+            ));
+    }
+
+    public function getHandlerSetting($component)
+    {
+        return $this->getHandlerSettings()
+            ->filter('Component', $component)
+            ->first();
+    }
+
     public function onAfterWrite()
     {
 
@@ -321,8 +341,9 @@ class FlexiFormExtension extends DataExtension
 
             $fields = $this->owner->FlexiFormFields();
             foreach ($this->getFlexiFormInitialFields() as $definition) {
-                if(!is_array($definition) || !isset($definition['Name']) || !isset($definition['Type'])) {
-                    throw new ValidationException('Initial Field Definitions must be an associative array, with at least Name and Type provided.');
+                if (! is_array($definition) || ! isset($definition['Name']) || ! isset($definition['Type'])) {
+                    throw new ValidationException(
+                        'Initial Field Definitions must be an associative array, with at least Name and Type provided.');
                 }
 
                 // lookup field name, prioritizing Readonly fields
@@ -341,7 +362,7 @@ class FlexiFormExtension extends DataExtension
                     $extraFields[$property] = $value;
                 }
 
-                $fields->add($field,$extraFields);
+                $fields->add($field, $extraFields);
             }
         }
 
@@ -351,11 +372,14 @@ class FlexiFormExtension extends DataExtension
         }
 
         // seed the identifier
-        // @TODO perhaps base on title of extended object??
+        // @TODO  base  off the title of extended object, make recognizable??
         if (empty($this->owner->FlexiFormIdentifier)) {
             $this->owner->FlexiFormIdentifier = "{$this->owner->class}_{$this->owner->ID}";
             $this->owner->write();
         }
+
+        // @TODO  if handler changes, remove old settings. [janitorial]
+
 
         return parent::onAfterWrite();
     }
