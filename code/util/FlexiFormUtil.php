@@ -23,14 +23,15 @@ class FlexiFormUtil
             return self::$identifier_cache[$identifier];
         }
 
-        foreach(self::GetFlexiFormClasses() as $className) {
-            if($flexi = DataObject::get($className)->filter('FlexiFormIdentifier',$identifier)->first()) {
+        if($config = FlexiFormConfig::get()->filter('FormIdentifier',$identifier)->first()) {
+            if($flexi = $config->getFlexi()) {
                 self::$identifier_cache[$identifier] = $flexi;
                 return $flexi;
             }
         }
     }
 
+    /* @deprecated no longer used
     public static function GetFlexiFormClasses(){
         // @todo more efficient manner for finding classes extended by _extension_ ?
 
@@ -42,6 +43,7 @@ class FlexiFormUtil
         }
         return $classes;
     }
+    */
 
     public static function CreateFlexiField($className, $definition)
     {

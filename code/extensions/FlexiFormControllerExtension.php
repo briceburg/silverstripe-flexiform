@@ -13,7 +13,7 @@ class FlexiFormControllerExtension extends Extension
 
     public function FlexiForm($identifier = null)
     {
-        $flexi = $this->owner->getFlexiFormObject($identifier);
+        $flexi = $this->getFlexiFormObject($identifier);
         $handler = $flexi->FlexiFormHandler();
 
         $fields = $flexi->getFlexiFormFrontEndFields();
@@ -27,11 +27,12 @@ class FlexiFormControllerExtension extends Extension
 
         // identify the form in post
         $form->setFormAction(
-            Controller::join_links($this->owner->Link(), $form_name, $flexi->FlexiFormIdentifier));
+            Controller::join_links($this->owner->Link(), $form_name, $flexi->FlexiFormID()));
+
 
         // if the form is successfull and the onSuccess handler returns
         //  a non boolean value, return its value. else return  the form.
-        if ($this->FlexiFormPosted($flexi->FlexiFormIdentifier) && $success = $handler->onSuccess($form, $flexi)) {
+        if ($this->FlexiFormPosted($flexi->FlexiFormID()) && $success = $handler->onSuccess($form, $flexi)) {
             if (! is_bool($success)) {
                 return $success;
             }
@@ -45,15 +46,13 @@ class FlexiFormControllerExtension extends Extension
         return $this->FlexiForm($request->param('ID'));
     }
 
-    // @TODO must direct to success
-
     public function FlexiFormPostHandler($data, $form, $request)
     {
         $flexi = $this->owner->getFlexiFormObject($request->param('ID'));
         $handler = $flexi->FlexiFormHandler();
 
         if ($handler->onSubmit($data, $form, $request, $flexi)) {
-            $this->flexiform_posted = $flexi->FlexiFormIdentifier;
+            $this->flexiform_posted = $flexi->FlexiFormID();
 
             // mark submitted, reset token to prevent re-submissions
             $form->markSubmitted();

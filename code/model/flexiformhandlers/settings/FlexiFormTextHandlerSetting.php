@@ -6,9 +6,9 @@ class FlexiFormTextHandlerSetting extends FlexiFormHandlerSetting {
         'Value' => 'Text'
     );
 
-    public function getCMSField($name, $title = null)
+    public function getCMSField($name)
     {
-        return new TextareaField($name, $title);
+        return new TextareaField($name, null, $this->Value);
     }
 
 }

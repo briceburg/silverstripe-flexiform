@@ -5,7 +5,15 @@ class FlexiFormBasicHandler extends FlexiFormHandler
 
     private static $handler_label = 'Basic Handler';
 
-    private static $handler_description = 'Submissions are stored. Presents a success you message upon completion.';
+    private static $handler_description = 'Submissions are stored. Presents a thank you message.';
+
+    /**
+     * Define setting fields configurable by forms using this handler.
+     * Limited to $db fields ATM, component name MUST match $db component name.
+     *  <component> : <setting classname>
+     *
+     * @var Array
+     */
 
     private static $handler_settings = array(
         'SuccessMessage' => 'FlexiFormHTMLTextHandlerSetting'
@@ -23,29 +31,9 @@ class FlexiFormBasicHandler extends FlexiFormHandler
         return parent::populateDefaults();
     }
 
-    public function getCMSFields()
+    public function updateCMSFlexiTabs(TabSet $fields, TabSet $settings_tab, $flexi)
     {
-        $fields = parent::getCMSFields();
-
-        //$fields->addFieldToTab('Root.Main', new HtmlEditorField('SuccessMessage.Value','GGG'));
-
-
-
-        return $fields;
-    }
-
-    public function updateCMSFlexiTabs(TabSet $fields, $flexi)
-    {
-        parent::updateCMSFlexiTabs($fields, $flexi);
-
-        // Settings
-        ///////////
-
-        /*
-        $field = new HtmlEditorField('FlexiFormHandlerSetting[SuccessMessage]', 'Success Message',
-            $this->SuccessMessage);
-        $fields->insertAfter($field, 'FlexiFormHandlerSettings');
-        */
+        parent::updateCMSFlexiTabs($fields, $settings_tab, $flexi);
 
         // Submissions
         //////////////

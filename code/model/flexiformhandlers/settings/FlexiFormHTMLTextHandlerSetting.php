@@ -1,15 +1,14 @@
 <?php
 
-class FlexiFormHTMLTextHandlerSetting extends FlexiFormHandlerSetting {
+class FlexiFormHTMLTextHandlerSetting extends FlexiFormHandlerSetting
+{
 
     private static $casting = array(
         'Value' => 'HTMLText'
     );
 
-
-    public function getCMSField($name, $title = null)
+    public function getCMSField($name)
     {
-        return new HtmlEditorField($name, $title);
+        return new HtmlEditorField($name, null, $this->Value);
     }
-
 }
