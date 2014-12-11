@@ -3,9 +3,22 @@
 class FlexiFormHandler extends DataObject
 {
 
-    protected $handler_label = 'Override Me';
+    private static $handler_label = 'FlexiForm Handler';
 
-    protected $handler_description = 'Override Me';
+    private static $handler_description = 'A Description of this Handler';
+
+
+    /**
+     * Define setting fields configurable by forms using this handler.
+     * Limited to $db fields ATM, component name MUST match $db component name.
+     *  <component> : <setting classname>
+     *
+     * @var Array
+     */
+
+    private static $handler_settings = array(
+        'SubmitButtonText' => 'FlexiFormHandlerSetting'
+    );
 
     // used to automatically generate handlers during /dev/build
     private static $required_handler_definitions = array();
@@ -14,12 +27,19 @@ class FlexiFormHandler extends DataObject
         'HandlerName' => 'Varchar',
         'Description' => 'Varchar(255)',
         'Readonly' => 'Boolean',
+
+        // settings
         'SubmitButtonText' => 'Varchar'
+    );
+
+    private static $has_many = array(
+        'Configs' => 'FlexiFormConfig'
     );
 
     public function populateDefaults()
     {
-        $this->SubmitButtonText = 'Submit';
+        $this->Description = $this->stat('handler_description');
+        $this->SubmitButtonText = _t("FlexiFormHandler.DEFAULT_SUBMIT_BUTTON_TEXT", "Submit");
 
         return parent::populateDefaults();
     }
@@ -30,11 +50,7 @@ class FlexiFormHandler extends DataObject
             return false;
         }
 
-        if ($this->getSelected()) {
-            return false;
-        }
-
-        // more than the current form will be impacted...
+        // forms are using this handler...
         if ($this->FormCount()) {
             return false;
         }
@@ -49,8 +65,46 @@ class FlexiFormHandler extends DataObject
         $fields->dataFieldByName('HandlerName')->setTitle('Name');
 
         if ($this->Readonly) {
-            $fields = $fields->transform(new ReadonlyTransformation());
+            $fields->replaceField('HandlerName',$fields->dataFieldByName('HandlerName')->performReadonlyTransformation());
+            $fields->replaceField('Description',$fields->dataFieldByName('Description')->performReadonlyTransformation());
         }
+
+        // Settings
+        ///////////
+
+        /*
+
+        $fields->addFieldsToTab('Root.Main',
+            array(
+                new HeaderField('Default Settings'),
+
+                //  used by setHandlerSettings method
+                new HiddenField('HandlerSettings', 'HandlerSettings', true)
+            ));
+
+        foreach ($this->has_one() as $component => $class) {
+            $singleton = singleton($class);
+            if ($singleton->is_a('FlexiFormHandlerSetting')) {
+
+                // remove field created by parent scaffolding
+                $fields->removeByName($component . 'ID');
+
+                if (! $value = $this->relField($component . '.Value')) {
+                    // if no existing value, do we have a default value?
+                    //  [typically set by populateDefaults]
+                    if (property_exists($this, $component)) {
+                        $value = $this->$component;
+                    }
+                }
+                $field = $singleton->getCMSField($component);
+                //$this->$component = $value;
+                $field->setValue($value);
+
+                $fields->addFieldToTab('Root.Main', $field);
+            }
+        }
+        */
+
 
         return $fields;
     }
@@ -62,6 +116,14 @@ class FlexiFormHandler extends DataObject
 
         // FlexiFormHandlerSetting[<fieldname>] hack to allow editing handler
         //  from form gridfield, perhaps use gridfieldaddons editor instead?
+
+        /*
+        $form_settings = $flexi->getHandlerSettings()->map('Component','Value');
+        foreach($this->stat('handler_settings') as $component => $class) {
+            $field = singleton($class)->getCMSField();
+
+        }
+        */
 
 
         $field = new TextField('FlexiFormHandlerSetting[SubmitButtonText]', 'Submit Button Text',
@@ -115,7 +177,7 @@ class FlexiFormHandler extends DataObject
     ////////////
     public function Label()
     {
-        return $this->handler_label;
+        return $this->stat('handler_label');
     }
 
     public function DescriptionPreview()
@@ -125,7 +187,13 @@ class FlexiFormHandler extends DataObject
 
     public function FormCount()
     {
-        return ($this->exists()) ? FlexiFormHandlerMapping::count($this) : 0;
+        return $this->Configs()->count();
+    }
+
+    public function getTitle()
+    {
+        $readonly = ($this->Readonly) ? '*' : '';
+        return "{$this->HandlerName} ({$this->Label()})$readonly";
     }
 
     // Getters & Setters
@@ -140,10 +208,6 @@ class FlexiFormHandler extends DataObject
         return $this->set_stat('required_handler_definitions', $definitions);
     }
 
-    public function getSelected()
-    {
-        return ($this->ID == $this->stat('selected_handler_id'));
-    }
 
     // Utility Methods
     //////////////////
@@ -157,12 +221,6 @@ class FlexiFormHandler extends DataObject
         return $this->owner->stat($lookup);
     }
 
-    public function getTitle()
-    {
-        $readonly = ($this->Readonly) ? '*' : '';
-        return "{$this->HandlerName} ({$this->handler_label})$readonly";
-    }
-
     public function requireDefaultRecords()
     {
         foreach ($this->getRequiredHandlerDefinitions() as $definition) {
@@ -171,17 +229,11 @@ class FlexiFormHandler extends DataObject
         return parent::requireDefaultRecords();
     }
 
-    public function onBeforeWrite()
-    {
-        if (empty($this->Description)) {
-            $this->Description = $this->handler_description;
-        }
-        return parent::onBeforeWrite();
-    }
-
     public function onBeforeDelete()
     {
-        FlexiFormHandlerMapping::removeHandlerMappings($this);
+        foreach(FlexiFormHandlerSetting::get()->filter('HandlerID',$this->ID) as $setting) {
+            $setting->delete();
+        }
 
         return parent::onBeforeDelete();
     }

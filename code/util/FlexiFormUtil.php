@@ -23,8 +23,8 @@ class FlexiFormUtil
             return self::$identifier_cache[$identifier];
         }
 
-        foreach(self::GetFlexiFormClasses() as $className) {
-            if($flexi = DataObject::get($className)->filter('FlexiFormIdentifier',$identifier)->first()) {
+        if($config = FlexiFormConfig::get()->filter('Identifier',$identifier)->first()) {
+            if($flexi = $config->getFlexi()) {
                 self::$identifier_cache[$identifier] = $flexi;
                 return $flexi;
             }
