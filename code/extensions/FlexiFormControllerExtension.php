@@ -18,7 +18,7 @@ class FlexiFormControllerExtension extends Extension
 
         $fields = $flexi->getFlexiFormFrontEndFields();
         $actions = new FieldList(
-            FormAction::create('FlexiFormPostHandler')->setTitle($handler->SubmitButtonText));
+            FormAction::create('FlexiFormPostHandler')->setTitle($flexi->FlexiFormSetting("SubmitButtonText")));
         $validator = $handler->getFrontEndFormValidator($flexi);
 
         $form_class = $flexi->stat('flexiform_form_class');

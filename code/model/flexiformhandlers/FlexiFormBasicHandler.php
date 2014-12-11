@@ -66,7 +66,7 @@ class FlexiFormBasicHandler extends FlexiFormHandler
 
     public function onSuccess(FlexiForm $form, DataObject $flexi)
     {
-        return $this->SuccessMessage;
+        return $flexi->FlexiFormSetting('SuccessMessage');
     }
 
     // Utility Methods

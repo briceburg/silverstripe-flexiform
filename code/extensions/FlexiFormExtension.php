@@ -265,6 +265,10 @@ class FlexiFormExtension extends DataExtension
         return $this->FlexiFormConf('Handler');
     }
 
+    public function FlexiFormSetting($setting){
+        return $this->FlexiFormConf("Setting.$setting");
+    }
+
     public function validate(ValidationResult $result)
     {
         $names = array();
