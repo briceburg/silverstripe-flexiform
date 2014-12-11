@@ -55,7 +55,6 @@ class FlexiFormExtension extends DataExtension
         )
     );
 
-
     public function updateCMSFields(FieldList $fields)
     {
         if (! $this->getFlexiFormUpdateCMSFields()) {
@@ -79,7 +78,7 @@ class FlexiFormExtension extends DataExtension
             $field_types = array();
             foreach ($this->getFlexiFormFieldTypes() as $className) {
                 $singleton = singleton($className);
-                if($singleton->canCreate(Member::currentUser())) {
+                if ($singleton->canCreate(Member::currentUser())) {
                     $field_types[$className] = "{$singleton->Label()}";
                 }
             }
@@ -90,7 +89,7 @@ class FlexiFormExtension extends DataExtension
             $component->setClasses($field_types);
 
             // hint allowed types to FlexiFormField search fields
-            singleton('FlexiFormField')->set_stat('allowed_types',$field_types);
+            singleton('FlexiFormField')->set_stat('allowed_types', $field_types);
 
             $fields_tab->push(
                 new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config));
@@ -99,10 +98,14 @@ class FlexiFormExtension extends DataExtension
             ///////////
 
 
-            $settings_tab->push(new TextField('FlexiFormConfig[FormIdentifier]', 'Form Identifier'));
+            $settings_tab->push(new HiddenField('FlexiFormConfigs')); // trigger setFlexiFormConfigs method
+            $settings_tab->push(
+                new TextField('FlexiFormConfig[FormIdentifier]', 'Form Identifier',
+                    $this->FlexiFormConf('FormIdentifier')));
 
             $settings_tab->push(
-                new DropdownField('FlexiFormConfig[HandlerID]', 'Form Handler', FlexiFormHandler::get()->map()));
+                new DropdownField('FlexiFormConfig[HandlerID]', 'Form Handler', FlexiFormHandler::get()->map(),
+                    $this->FlexiFormConf('HandlerID')));
 
             $field = new ToggleCompositeField('ManageHandlers', 'Manage Handlers',
                 array(
@@ -118,16 +121,7 @@ class FlexiFormExtension extends DataExtension
 
             $handler = $this->FlexiFormHandler();
             if ($handler->exists()) {
-
-                $other_form_count = $handler->FormCount() - 1;
-                $plural = ($other_form_count > 1) ? 'forms' : 'form';
-                $description = ($other_form_count) ? "<em>Your changes will impact <strong>$other_form_count other $plural</strong>. If you would like your changes to impact only this form, create a new handler.</em>" : '';
-                $field = new LiteralField('HandlerSettings', "<h3>Handler Settings</h3>$description");
-
-                $settings_tab->push($field);
-
-                // let selected handler augment fields
-                $handler->updateCMSFlexiTabs($flexi_tabs, $this->owner);
+                $handler->updateCMSFlexiTabs($flexi_tabs, $settings_tab, $this->owner);
             }
         } else {
             $fields->addFieldToTab($this->getFlexiFormTab(),
@@ -234,33 +228,45 @@ class FlexiFormExtension extends DataExtension
         return $this->owner->set_stat('flexiform_default_handler_name', $name);
     }
 
-    // hack to allow editing handler from form gridfield,
-    //   perhaps use gridfieldaddons linline editor instead?
-    public function setFlexiFormHandlerSettings($value)
+    // allow editing config, handler settings in form gridfield
+    public function setFlexiFormConfigs($value)
     {
-        if ($settings = Controller::curr()->getRequest()->requestVar('FlexiFormHandlerSetting')) {
+        if ($configs = Controller::curr()->getRequest()->requestVar('FlexiFormConfig')) {
 
-            $handler = $this->owner->FlexiFormHandler();
-            foreach (array_intersect_key($settings, $handler->db()) as $property => $value) {
-                $handler->$property = $value;
+            $conf = $this->FlexiFormConf();
+
+            foreach ($configs as $property => $value) {
+                if ($property == 'Setting') {
+                    $settings = ($value[$conf->HandlerID]) ?  : array();
+                    $conf->updateHandlerSettings($settings);
+                } elseif ($conf->hasDatabaseField($property)) {
+                    $conf->$property = $value;
+                }
             }
-            $handler->write();
+
+            $conf->write();
         }
     }
     // Utility Methods
     //////////////////
-
-    public function FlexiFormConf($fieldName = null) {
+    public function FlexiFormConf($fieldName = null)
+    {
         $conf = $this->owner->FlexiFormConfig();
         return ($fieldName) ? $conf->relField($fieldName) : $conf;
     }
 
-    public function FlexiFormID(){
+    public function FlexiFormID()
+    {
         return $this->FlexiFormConf('FormIdentifier');
     }
 
-    public function FlexiFormHandler(){
+    public function FlexiFormHandler()
+    {
         return $this->FlexiFormConf('Handler');
+    }
+
+    public function FlexiFormSetting($setting){
+        return $this->FlexiFormConf("Setting.$setting");
     }
 
     public function validate(ValidationResult $result)
@@ -290,8 +296,7 @@ class FlexiFormExtension extends DataExtension
                 }
             }
 
-            if ($this->FlexiFormID() &&
-                 $flexi = FlexiFormUtil::GetFlexiByIdentifier($this->FlexiFormID())) {
+            if ($this->FlexiFormID() && $flexi = FlexiFormUtil::GetFlexiByIdentifier($this->FlexiFormID())) {
                 if ($flexi->ID != $this->owner->ID) {
                     $result->error('Form Identifier in use by another form.');
                 }
@@ -301,9 +306,10 @@ class FlexiFormExtension extends DataExtension
 
     public function onAfterWrite()
     {
-        // make sure we have a valid config
+        // ensure valid config
+        //////////////////////
         $conf = $this->FlexiFormConf();
-        if(!$conf->exists()){
+        if (! $conf->exists()) {
 
             if ($name = $this->getFlexiFormDefaultHandlerName()) {
                 if ($handler = FlexiFormHandler::get()->filter('HandlerName', $name)->first()) {
@@ -311,20 +317,24 @@ class FlexiFormExtension extends DataExtension
                 }
             }
             $conf->FlexiFormID = $this->owner->ID;
-            $conf->FlexiFormClass = $this->class;
+            $conf->FlexiFormClass = $this->owner->class;
             $conf->write();
 
             $this->owner->FlexiFormConfigID = $conf->ID;
             $this->owner->write();
         }
 
-        // if this is a newly created form, prepopulate fields
+        // initialize fields on new forms
+        /////////////////////////////////
+
+
         if ($this->owner->isChanged('ID')) {
 
             $fields = $this->owner->FlexiFormFields();
             foreach ($this->getFlexiFormInitialFields() as $definition) {
-                if(!is_array($definition) || !isset($definition['Name']) || !isset($definition['Type'])) {
-                    throw new ValidationException('Initial Field Definitions must be an associative array, with at least Name and Type provided.');
+                if (! is_array($definition) || ! isset($definition['Name']) || ! isset($definition['Type'])) {
+                    throw new ValidationException(
+                        'Initial Field Definitions must be an associative array, with at least Name and Type provided.');
                 }
 
                 // lookup field name, prioritizing Readonly fields
@@ -343,21 +353,21 @@ class FlexiFormExtension extends DataExtension
                     $extraFields[$property] = $value;
                 }
 
-                $fields->add($field,$extraFields);
+                $fields->add($field, $extraFields);
             }
         }
 
+        // seed Form Identifier
+        ///////////////////////
 
-        // seed the identifier
-        if (!$this->FlexiFormID()) {
+
+        if (! $this->FlexiFormID()) {
             $conf = $this->FlexiFormConf();
 
             // @TODO perhaps base on title of extended object??
             $conf->FormIdentifier = "{$this->owner->class}_{$this->owner->ID}";
             $conf->write();
         }
-
-
 
         return parent::onAfterWrite();
     }
@@ -368,7 +378,7 @@ class FlexiFormExtension extends DataExtension
     public function onBeforeDelete()
     {
         $conf = $this->FlexiFormConf();
-        if($conf->exists()){
+        if ($conf->exists()) {
             $conf->delete();
         }
         return parent::onBeforeDelete();

@@ -62,6 +62,7 @@ class FlexiFormHandler extends DataObject
     {
         $fields = parent::getCMSFields();
         $fields->removeByName('Readonly');
+        $fields->removeByName('Configs');
         $fields->dataFieldByName('HandlerName')->setTitle('Name');
 
         if ($this->Readonly) {
@@ -69,66 +70,32 @@ class FlexiFormHandler extends DataObject
             $fields->replaceField('Description',$fields->dataFieldByName('Description')->performReadonlyTransformation());
         }
 
-        // Settings
-        ///////////
-
-        /*
-
-        $fields->addFieldsToTab('Root.Main',
-            array(
-                new HeaderField('Default Settings'),
-
-                //  used by setHandlerSettings method
-                new HiddenField('HandlerSettings', 'HandlerSettings', true)
-            ));
-
-        foreach ($this->has_one() as $component => $class) {
-            $singleton = singleton($class);
-            if ($singleton->is_a('FlexiFormHandlerSetting')) {
-
-                // remove field created by parent scaffolding
-                $fields->removeByName($component . 'ID');
-
-                if (! $value = $this->relField($component . '.Value')) {
-                    // if no existing value, do we have a default value?
-                    //  [typically set by populateDefaults]
-                    if (property_exists($this, $component)) {
-                        $value = $this->$component;
-                    }
-                }
-                $field = $singleton->getCMSField($component);
-                //$this->$component = $value;
-                $field->setValue($value);
-
-                $fields->addFieldToTab('Root.Main', $field);
-            }
-        }
-        */
-
-
         return $fields;
     }
 
-    public function updateCMSFlexiTabs(TabSet $fields, $flexi)
+    public function updateCMSFlexiTabs(TabSet $fields, TabSet $settings_tab, $flexi)
     {
-        $field = new HiddenField('FlexiFormHandlerSettings', 'FlexiFormHandlerSettings', true);
-        $fields->insertAfter($field, 'HandlerSettings');
+        $field = new LiteralField('HandlerSettings', "<h3>Handler Settings</h3>");
+        $settings_tab->push($field);
 
-        // FlexiFormHandlerSetting[<fieldname>] hack to allow editing handler
-        //  from form gridfield, perhaps use gridfieldaddons editor instead?
 
-        /*
-        $form_settings = $flexi->getHandlerSettings()->map('Component','Value');
-        foreach($this->stat('handler_settings') as $component => $class) {
-            $field = singleton($class)->getCMSField();
+        $form_settings = $flexi->FlexiFormConf('HandlerSettings');
+        foreach(Config::inst()->get($this->class, 'handler_settings', Config::INHERITED) as $component => $class) {
 
+            if(!$setting = $flexi->FlexiFormSetting($component)) {
+                $setting = new $class();
+                $setting->Setting = $component;
+                $setting->HandlerID = $this->ID;
+                $form_settings->add($setting);
+            }
+
+            $field = $setting->getCMSField($component);
+
+            // field name: FlexiFormConfig[Setting][<handler_id>][<setting_name>]
+            $field->setName("FlexiFormConfig[Setting][{$this->ID}][$component]");
+            $settings_tab->push($field);
         }
-        */
 
-
-        $field = new TextField('FlexiFormHandlerSetting[SubmitButtonText]', 'Submit Button Text',
-            $this->SubmitButtonText);
-        $fields->insertBefore($field, 'FlexiFormHandlerSettings');
     }
 
     public function getFrontEndFormValidator($flexi)
@@ -231,8 +198,9 @@ class FlexiFormHandler extends DataObject
 
     public function onBeforeDelete()
     {
-        foreach(FlexiFormHandlerSetting::get()->filter('HandlerID',$this->ID) as $setting) {
-            $setting->delete();
+        foreach(FlexiFormHandlerSetting::get()->filter('HandlerID',$this->ID) as $item) {
+            // remove on HasManyList only orphans item. Actually delete it.
+            $item->delete();
         }
 
         return parent::onBeforeDelete();
