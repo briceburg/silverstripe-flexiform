@@ -6,6 +6,7 @@ class FlexiFormConfig extends DataObject
     private static $db = array(
         'FlexiFormID' => 'Int',
         'FlexiFormClass' => 'Varchar',
+        'InitializedFields' => 'Boolean',
         'FormIdentifier' => 'Varchar'
     );
 

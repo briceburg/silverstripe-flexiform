@@ -306,9 +306,10 @@ class FlexiFormExtension extends DataExtension
 
     public function onAfterWrite()
     {
+        $conf = $this->FlexiFormConf();
+
         // ensure valid config
         //////////////////////
-        $conf = $this->FlexiFormConf();
         if (! $conf->exists()) {
 
             if ($name = $this->getFlexiFormDefaultHandlerName()) {
@@ -327,33 +328,36 @@ class FlexiFormExtension extends DataExtension
         // initialize fields on new forms
         /////////////////////////////////
 
+        if (!$this->FlexiFormConf('InitializedFields')) {
+            $definitions = $this->getFlexiFormInitialFields();
+            if(!empty($definitions)) {
+                $fields = $this->owner->FlexiFormFields();
+                foreach ($definitions as $definition) {
+                    if (! is_array($definition) || ! isset($definition['Name']) || ! isset($definition['Type'])) {
+                        throw new ValidationException(
+                            'Initial Field Definitions must be an associative array, with at least Name and Type provided.');
+                    }
 
-        if ($this->owner->isChanged('ID')) {
+                    // lookup field name, prioritizing Readonly fields
+                    if (! $field = FlexiFormField::get()->sort('Readonly', 'DESC')
+                        ->filter(
+                        array(
+                            'FieldName' => $definition['Name'],
+                            'ClassName' => $definition['Type']
+                        ))
+                        ->first()) {
+                        $field = FlexiFormUtil::CreateFlexiField($definition['Type'], $definition);
+                    }
 
-            $fields = $this->owner->FlexiFormFields();
-            foreach ($this->getFlexiFormInitialFields() as $definition) {
-                if (! is_array($definition) || ! isset($definition['Name']) || ! isset($definition['Type'])) {
-                    throw new ValidationException(
-                        'Initial Field Definitions must be an associative array, with at least Name and Type provided.');
+                    $extraFields = array();
+                    foreach (array_intersect_key($definition, $fields->getExtraFields()) as $property => $value) {
+                        $extraFields[$property] = $value;
+                    }
+
+                    $fields->add($field, $extraFields);
                 }
-
-                // lookup field name, prioritizing Readonly fields
-                if (! $field = FlexiFormField::get()->sort('Readonly', 'DESC')
-                    ->filter(
-                    array(
-                        'FieldName' => $definition['Name'],
-                        'ClassName' => $definition['Type']
-                    ))
-                    ->first()) {
-                    $field = FlexiFormUtil::CreateFlexiField($definition['Type'], $definition);
-                }
-
-                $extraFields = array();
-                foreach (array_intersect_key($definition, $fields->getExtraFields()) as $property => $value) {
-                    $extraFields[$property] = $value;
-                }
-
-                $fields->add($field, $extraFields);
+                $conf->InitializedFields = true;
+                $conf->write();
             }
         }
 
