@@ -2,13 +2,6 @@
 //@TODO Validate Identifier / force aphanumeric_
 class FlexiFormExtension extends DataExtension
 {
-
-    /**
-     * Toggles appending flexiform fields to the CMS.
-     * @var Boolean
-     */
-    private static $flexiform_update_cms_fields = true;
-
     private static $flexiform_tab = 'Root.Form';
 
     private static $flexiform_insertBefore = null;
@@ -56,10 +49,6 @@ class FlexiFormExtension extends DataExtension
 
     public function updateCMSFields(FieldList $fields)
     {
-        if (! $this->getFlexiFormUpdateCMSFields()) {
-            return;
-        }
-
         $fields->removeByName('FlexiFormFields');
         $fields->removeByName('FlexiFormConfigID');
 
@@ -146,16 +135,6 @@ class FlexiFormExtension extends DataExtension
 
     // Getters & Setters
     ////////////////////
-    public function getFlexiFormUpdateCMSFields()
-    {
-        return $this->owner->stat('flexiform_update_cms_fields');
-    }
-
-    public function setFlexiFormUpdateCMSFields($boolean)
-    {
-        return $this->owner->set_stat('flexiform_update_cms_fields', $boolean);
-    }
-
     public function getFlexiFormTab()
     {
         return $this->owner->stat('flexiform_tab');
