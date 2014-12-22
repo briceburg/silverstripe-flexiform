@@ -166,11 +166,6 @@ class FlexiFormField extends DataObject
         return sprintf('%s_%s', $this->ClassName, $this->ID);
     }
 
-    public function OptionsPreview()
-    {
-        return '-';
-    }
-
     public function transformValue($value)
     {
         return $value;

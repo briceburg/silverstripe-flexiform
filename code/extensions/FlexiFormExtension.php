@@ -31,8 +31,7 @@ class FlexiFormExtension extends DataExtension
     private static $flexiform_initial_fields = array();
 
     /**
-     * The name of the default handler for this form. See flexiform.yml
-     * @TODO ?
+     * The name of the default handler for this form.
      * @var String
      */
     private static $flexiform_default_handler_name = 'Default';

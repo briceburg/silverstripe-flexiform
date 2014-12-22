@@ -52,10 +52,6 @@ class GridFieldConfig_FlexiForm extends GridFieldConfig
                             'DefaultValue') : new TextField($column_name);
                     }
                 ),
-                'OptionsPreview' => array(
-                    'title' => 'Options',
-                    'field' => 'ReadonlyField'
-                ),
                 'Required' => array(
                     'title' => 'Required',
                     'field' => 'CheckboxField'

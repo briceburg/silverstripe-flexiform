@@ -2,12 +2,12 @@
 
 class FlexiFormOptionField extends FlexiFormField
 {
+
     public function canCreate($member = null)
     {
         // allow creation of descendents, not this class itself.
         return ($this->class === __CLASS__) ? false : parent::canCreate($member);
     }
-
 
     public function getCMSFields()
     {
@@ -15,7 +15,9 @@ class FlexiFormOptionField extends FlexiFormField
 
         if ($this->Readonly) {
             $fields->addFieldsToTab('Root.Main',
-                new ReadonlyField('ReadonlyOptions', 'Options', $this->OptionsPreview(999)));
+                new ReadonlyField('ReadonlyOptions', 'Options',
+                    implode(', ', $this->Options()
+                        ->column('Value'))));
         } else {
 
             $config = new GridFieldConfig_FlexiFormOption();
@@ -44,14 +46,6 @@ class FlexiFormOptionField extends FlexiFormField
         }
 
         return $result;
-    }
-
-    // template
-    ///////////
-    public function OptionsPreview($limit = 24)
-    {
-        $field = DBField::create_field('Text', implode(', ', $this->Options()->column('Value')));
-        return $field->LimitCharacters($limit);
     }
 
     // utility
