@@ -221,8 +221,11 @@ class FlexiFormExtension extends DataExtension
                     $conf->$property = $value;
                 }
             }
-
             $conf->write();
+
+            if($handler = $this->FlexiFormHandler()) {
+                $handler->onConfigUpdate($conf, $this);
+            }
         }
     }
     // Utility Methods
@@ -353,9 +356,6 @@ class FlexiFormExtension extends DataExtension
 
         return parent::onAfterWrite();
     }
-
-    public function onBeforeWrite()
-    {}
 
     public function onBeforeDelete()
     {

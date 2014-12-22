@@ -51,7 +51,7 @@ class FlexiFormConfig extends DataObject
         }
     }
 
-    public function onBeforeWrite()
+    protected function onBeforeWrite()
     {
         if ($this->exists() && $this->isChanged('HandlerID')) {
             foreach ($this->HandlerSettings()->filter('HandlerID:not', $this->HandlerID) as $item) {
@@ -62,7 +62,7 @@ class FlexiFormConfig extends DataObject
         return parent::onBeforeWrite();
     }
 
-    public function onBeforeDelete()
+    protected function onBeforeDelete()
     {
         foreach ($this->HandlerSettings() as $item) {
             // remove on HasManyList only orphans item. Actually delete it.

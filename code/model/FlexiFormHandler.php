@@ -7,7 +7,6 @@ class FlexiFormHandler extends DataObject
 
     private static $handler_description = 'A Description of this Handler';
 
-
     /**
      * Define setting fields configurable by forms using this handler.
      * Limited to $db fields ATM, component name MUST match $db component name.
@@ -15,7 +14,6 @@ class FlexiFormHandler extends DataObject
      *
      * @var Array
      */
-
     private static $handler_settings = array(
         'SubmitButtonText' => 'FlexiFormHandlerSetting'
     );
@@ -66,8 +64,12 @@ class FlexiFormHandler extends DataObject
         $fields->dataFieldByName('HandlerName')->setTitle('Name');
 
         if ($this->Readonly) {
-            $fields->replaceField('HandlerName',$fields->dataFieldByName('HandlerName')->performReadonlyTransformation());
-            $fields->replaceField('Description',$fields->dataFieldByName('Description')->performReadonlyTransformation());
+            $fields->replaceField('HandlerName',
+                $fields->dataFieldByName('HandlerName')
+                    ->performReadonlyTransformation());
+            $fields->replaceField('Description',
+                $fields->dataFieldByName('Description')
+                    ->performReadonlyTransformation());
         }
 
         return $fields;
@@ -78,11 +80,10 @@ class FlexiFormHandler extends DataObject
         $field = new LiteralField('HandlerSettings', "<h3>Handler Settings</h3>");
         $settings_tab->push($field);
 
-
         $form_settings = $flexi->FlexiFormConf('HandlerSettings');
-        foreach(Config::inst()->get($this->class, 'handler_settings', Config::INHERITED) as $component => $class) {
+        foreach (Config::inst()->get($this->class, 'handler_settings', Config::INHERITED) as $component => $class) {
 
-            if(!$setting = $flexi->FlexiFormSetting($component)) {
+            if (! $setting = $flexi->FlexiFormSetting($component)) {
                 $setting = new $class();
                 $setting->Setting = $component;
                 $setting->HandlerID = $this->ID;
@@ -95,7 +96,6 @@ class FlexiFormHandler extends DataObject
             $field->setName($this->getSettingFieldName($component));
             $settings_tab->push($field);
         }
-
     }
 
     public function getFrontEndFormValidator($flexi)
@@ -175,7 +175,6 @@ class FlexiFormHandler extends DataObject
         return $this->set_stat('required_handler_definitions', $definitions);
     }
 
-
     // Utility Methods
     //////////////////
     private function lookup($lookup, $do_not_merge = false)
@@ -188,9 +187,13 @@ class FlexiFormHandler extends DataObject
         return $this->owner->stat($lookup);
     }
 
-    protected function getSettingFieldName($setting){
+    protected function getSettingFieldName($setting)
+    {
         return "FlexiFormConfig[Setting][{$this->ID}][$setting]";
     }
+
+    public function onConfigUpdate(FlexiFormConfig $config, DataObject $flexi)
+    {}
 
     public function requireDefaultRecords()
     {
@@ -202,7 +205,7 @@ class FlexiFormHandler extends DataObject
 
     public function onBeforeDelete()
     {
-        foreach(FlexiFormHandlerSetting::get()->filter('HandlerID',$this->ID) as $item) {
+        foreach (FlexiFormHandlerSetting::get()->filter('HandlerID', $this->ID) as $item) {
             // remove on HasManyList only orphans item. Actually delete it.
             $item->delete();
         }
