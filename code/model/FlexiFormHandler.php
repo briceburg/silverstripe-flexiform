@@ -92,7 +92,7 @@ class FlexiFormHandler extends DataObject
             $field = $setting->getCMSField($component);
 
             // field name: FlexiFormConfig[Setting][<handler_id>][<setting_name>]
-            $field->setName("FlexiFormConfig[Setting][{$this->ID}][$component]");
+            $field->setName($this->getSettingFieldName($component));
             $settings_tab->push($field);
         }
 
@@ -186,6 +186,10 @@ class FlexiFormHandler extends DataObject
         }
 
         return $this->owner->stat($lookup);
+    }
+
+    protected function getSettingFieldName($setting){
+        return "FlexiFormConfig[Setting][{$this->ID}][$setting]";
     }
 
     public function requireDefaultRecords()
