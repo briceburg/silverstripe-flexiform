@@ -17,7 +17,7 @@ class FlexiFormOptionField extends FlexiFormField
             $fields->addFieldsToTab('Root.Main',
                 new ReadonlyField('ReadonlyOptions', 'Options',
                     implode(', ', $this->Options()
-                        ->column('Value'))));
+                        ->column('Label'))));
         } else {
 
             $config = new GridFieldConfig_FlexiFormOption();
@@ -67,7 +67,7 @@ class FlexiFormOptionField extends FlexiFormField
         if ($this->Options()->exists()) {
             $field->setSource(
                 $this->Options()
-                    ->map('Value', 'Value')
+                    ->map('Value', 'Label')
                     ->toArray());
         }
         $field->setEmptyString('None (Displays Empty String)');
