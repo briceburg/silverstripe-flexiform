@@ -136,6 +136,11 @@ class FlexiFormExtension extends DataExtension
         return $fields;
     }
 
+    // Templates
+    ////////////
+    public function Form(){
+        return Controller::curr()->FlexiForm($this->FlexiFormID());
+    }
     // Getters & Setters
     ////////////////////
     public function getFlexiFormTab()

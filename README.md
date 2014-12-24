@@ -39,7 +39,7 @@ Screenshots
 Usage 
 =====
 
-* Add forms to DataObjects and Pages by extending them `FlexiFormExtension`. E.g.
+* Add flexiforms to Pages and DataObjects by extending with `FlexiFormExtension`. E.g.
 
 ```php
 class Event extends DataObject
@@ -70,20 +70,37 @@ You will now see the Form tab when editing Event in the CMS.
 
 Here we use **$FlexiFormPosted** to hide Page's content if a form has been posted.
 
+Flexiform also provides a convenience wrapper around the standard **$Form** method.
+Calling $Form from a Page extended by FlexiFormExtension will output the associated
+flexiform. E.g.
+
+```html
+<div class="event-content">
+  <% if not FlexiFormPosted %>
+    $Content
+  <% end_if %>
+   
+  $Form    
+</div>
+```
+
+Works exactly the same as the first example.
+
 
 ### Form Identifiers
 
 
-Use Form Identifiers when you have **multiple forms on a page**, or need to 
-**reference a form from another page or object**. 
+Use Form Identifiers when you have **multiple forms on a page**, need to 
+**reference a form** (e.g from another page), or want to **control the post URL**. 
 
-By default, flexiform expects the current controller's _dataRecord_ to be a
-flexiform extended object. You can explicitly set the flexiform
+FlexiForm extends `ContentController` to provide the **$FlexiForm** method to all
+pages. By default it expects the controller's _dataRecord_ to be an object
+extended by `FlexiFormExtension`. You can explicitly set the flexiform
 object by calling the **setFlexiFormObject** method on your controller,  or by passing 
 an _Identifer_ to **$FlexiForm**.
 
-Form Identifiers are found and set through the  _Settings_ tab on flexiforms. The
-identifier is also used in post URLs to easily track submissions in your
+Form Identifiers are defined in the  _Settings_ tab on flexiforms. The
+identifier is also used in post URLs for easy tacking of form submissions in
 _server logs_ and _analytics_.
 
 ```html
