@@ -11,4 +11,8 @@ class FlexiFormBooleanHandlerSetting extends FlexiFormHandlerSetting {
         return new CheckboxField($name,null,$this->getValue());
     }
 
+    public function getValue(){
+        return (bool) parent::getValue();
+    }
+
 }

@@ -11,4 +11,8 @@ class FlexiFormIntHandlerSetting extends FlexiFormHandlerSetting {
         return new NumericField($name,null,$this->getValue());
     }
 
+    public function getValue(){
+        return (int) parent::getValue();
+    }
+
 }
