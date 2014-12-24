@@ -47,6 +47,8 @@ class FlexiFormField extends DataObject
         'FieldName'
     );
 
+    protected $allowDuplicateNames = false;
+
     public function canCreate($member = null)
     {
         return ($this->stat('can_create') === false) ? false : parent::canCreate($member);
@@ -99,7 +101,7 @@ class FlexiFormField extends DataObject
 
         if (empty($this->FieldName)) {
             $result->error("Name is required.");
-        } elseif ($obj = DataObject::get($this->class)->filter(
+        } elseif (!$this->allowDuplicateNames && $obj = DataObject::get($this->class)->filter(
             array(
                 'FieldName' => $this->FieldName,
                 'ID:not' => $this->ID,

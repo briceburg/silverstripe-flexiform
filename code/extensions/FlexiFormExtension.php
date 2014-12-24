@@ -224,7 +224,7 @@ class FlexiFormExtension extends DataExtension
             $conf->write();
 
             if($handler = $this->FlexiFormHandler()) {
-                $handler->onConfigUpdate($conf, $this);
+                $handler->onConfigUpdate($conf, $this->owner);
             }
         }
     }
