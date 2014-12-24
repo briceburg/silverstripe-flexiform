@@ -78,6 +78,9 @@ class FlexiFormExtension extends DataExtension
 
             // hint allowed types to FlexiFormField search fields
             singleton('FlexiFormField')->set_stat('allowed_types', $field_types);
+            $component = $config->getComponentByType('GridFieldAddExistingSearchButton');
+            $component->setSearchList(FlexiFormField::get()->filter('ClassName',array_keys($field_types)));
+
 
             $fields_tab->push(
                 new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config));
