@@ -7,6 +7,9 @@ class FlexiFormBasicHandler extends FlexiFormHandler
 
     private static $handler_description = 'Submissions are stored. Presents a thank you message.';
 
+    // references the current submission (for use by child classes)
+    protected $submission = null;
+
     /**
      * Define setting fields configurable by forms using this handler.
      * Limited to $db fields ATM, component name MUST match $db component name.
@@ -77,6 +80,8 @@ class FlexiFormBasicHandler extends FlexiFormHandler
         $submission->FlexiFormID = $flexi->ID;
         $submission->FlexiFormClass = $flexi->class;
         $submission->write();
+
+        $this->submission = $submission;
 
         $values = $submission->Values();
         foreach ($flexi->FlexiFormFields() as $field) {

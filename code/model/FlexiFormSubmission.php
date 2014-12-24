@@ -6,7 +6,8 @@ class FlexiFormSubmission extends DataObject
     private static $db = array(
         'FlexiFormID' => 'Int',
         'FlexiFormClass' => 'Varchar',
-        'IPAddress' => 'Varchar(45)'
+        'IPAddress' => 'Varchar(45)',
+        'StatusMessages' => 'Text'
     );
 
     private static $has_one = array(
@@ -22,6 +23,8 @@ class FlexiFormSubmission extends DataObject
         'Created' => 'Time Submitted',
         'Values.Count' => 'Response Count'
     );
+
+    protected $messages = array();
 
     public function populateDefaults()
     {
@@ -40,6 +43,7 @@ class FlexiFormSubmission extends DataObject
                 new ReadonlyField('SubmittedBy', 'Submitted By'),
                 new ReadonlyField('IPAddress', 'IP Address'),
                 new ReadonlyField('Created', 'Time Submitted'),
+                new ReadonlyField('StatusMessages'),
                 $field = new GridField('Values', 'Responses', $this->Values(),
                     new GridFieldConfig_FlexiFormSubmissionValues())
             ));
@@ -71,6 +75,19 @@ class FlexiFormSubmission extends DataObject
         }
 
         return parent::relField($fieldName);
+    }
+
+    public function addStatusMessage($message) {
+        $this->messages[] = $message;
+    }
+
+    public function onBeforeWrite(){
+        while($message = array_shift($this->messages)) {
+        $prefix = empty($this->StatusMessages) ? '' : ' ~~ ';
+            $this->StatusMessages .= $prefix . $message;
+        }
+
+        return parent::onBeforeWrite();
     }
 }
 
