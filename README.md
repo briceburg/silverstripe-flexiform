@@ -23,8 +23,6 @@ Requirements
 
 The venerable GridFieldExtensions https://github.com/ajshort/silverstripe-gridfieldextensions
 
-_OPTIONAL_ : Additonal fields from FlexiFields https://github.com/briceburg/silverstripe-flexifields
-
 Tested in SilverStripe 3.1
 
 Screenshots
@@ -68,7 +66,7 @@ You will now see the Form tab when editing Event in the CMS.
 </div>
 ```
 
-Here we use **$FlexiFormPosted** to hide Page's content if a form has been posted.
+Here we use **$FlexiFormPosted** to hide $Content if a form has been posted.
 
 Flexiform also provides a convenience wrapper around the standard **$Form** method.
 Calling $Form from a Page extended by FlexiFormExtension will output the associated

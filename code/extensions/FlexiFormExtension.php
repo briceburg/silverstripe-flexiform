@@ -2,6 +2,7 @@
 //@TODO Validate Identifier / force aphanumeric_
 class FlexiFormExtension extends DataExtension
 {
+
     private static $flexiform_tab = 'Root.Form';
 
     private static $flexiform_insertBefore = null;
@@ -9,6 +10,10 @@ class FlexiFormExtension extends DataExtension
     private static $flexiform_addButton = 'Create New Field';
 
     private static $flexiform_form_class = 'FlexiForm';
+
+    private static $flexiform_form_extraclasses = array(
+        'flexiform'
+    );
 
     /**
      * Specify allowed FlexiFormField Types for this form. Empty to allow all.
@@ -79,8 +84,7 @@ class FlexiFormExtension extends DataExtension
             // hint allowed types to FlexiFormField search fields
             singleton('FlexiFormField')->set_stat('allowed_types', $field_types);
             $component = $config->getComponentByType('GridFieldAddExistingSearchButton');
-            $component->setSearchList(FlexiFormField::get()->filter('ClassName',array_keys($field_types)));
-
+            $component->setSearchList(FlexiFormField::get()->filter('ClassName', array_keys($field_types)));
 
             $fields_tab->push(
                 new GridField('FlexiForm', 'Form Fields', $this->owner->FlexiFormFields(), $config));
@@ -138,7 +142,8 @@ class FlexiFormExtension extends DataExtension
 
     // Templates
     ////////////
-    public function Form(){
+    public function Form()
+    {
         return Controller::curr()->FlexiForm($this->FlexiFormID());
     }
     // Getters & Setters
@@ -231,7 +236,7 @@ class FlexiFormExtension extends DataExtension
             }
             $conf->write();
 
-            if($handler = $this->FlexiFormHandler()) {
+            if ($handler = $this->FlexiFormHandler()) {
                 $handler->onConfigUpdate($conf, $this->owner);
             }
         }
@@ -254,7 +259,8 @@ class FlexiFormExtension extends DataExtension
         return $this->FlexiFormConf('Handler');
     }
 
-    public function FlexiFormSetting($setting){
+    public function FlexiFormSetting($setting)
+    {
         return $this->FlexiFormConf("Setting.$setting");
     }
 
@@ -317,9 +323,10 @@ class FlexiFormExtension extends DataExtension
         // initialize fields on new forms
         /////////////////////////////////
 
-        if (!$this->FlexiFormConf('InitializedFields')) {
+
+        if (! $this->FlexiFormConf('InitializedFields')) {
             $definitions = $this->getFlexiFormInitialFields();
-            if(!empty($definitions)) {
+            if (! empty($definitions)) {
                 $fields = $this->owner->FlexiFormFields();
                 foreach ($definitions as $definition) {
                     if (! is_array($definition) || ! isset($definition['Name']) || ! isset($definition['Type'])) {

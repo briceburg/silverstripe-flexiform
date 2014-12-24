@@ -24,6 +24,7 @@ class FlexiFormControllerExtension extends Extension
         $form_class = $flexi->stat('flexiform_form_class');
         $form_name = Config::inst()->get($form_class, 'flexiform_post_action');
         $form = new $form_class($this->owner, $form_name, $fields, $actions, $validator);
+        $form->addExtraClass(implode(' ',$flexi->stat('flexiform_form_extraclasses')));
 
         // identify the form in post
         $form->setFormAction(
