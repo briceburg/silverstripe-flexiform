@@ -55,7 +55,7 @@ class FlexiFormOptionField extends FlexiFormField
         $field = parent::getFormField($title, $value, $required);
 
         $field->setSource($this->Options()
-            ->map('Value', 'Value')
+            ->map('Value', 'Label')
             ->toArray());
 
         return $field;
