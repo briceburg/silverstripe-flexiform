@@ -34,6 +34,8 @@ class FlexiFormSubmission extends DataObject
         return parent::populateDefaults();
     }
 
+    private static $default_sort = 'Created DESC';
+
     public function getCMSFields()
     {
         $fields = singleton('DataObject')->getCMSFields();
