@@ -19,7 +19,8 @@
     "silverstripe-australia/gridfieldextensions": "*"
   },
   "suggest": {
-    "briceburg/silverstripe-flexifields": "Useful additional fields for flexiform and beyond."
+    "briceburg/silverstripe-flexifields": "Useful additional fields for flexiform and beyond.",
+    "briceburg/silverstripe-flexiform-mailchimp": "Nicely integrate MailChimp lists with SilverStripe FlexiForms."
   },
 	"extra": {
 		"installer-name": "flexiform",
